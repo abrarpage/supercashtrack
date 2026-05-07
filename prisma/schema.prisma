@@ -1,0 +1,121 @@
+// Cash Tracker — Prisma schema
+// Prisma 7: connection URL lives in `prisma.config.ts`, not here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SenderType {
+  USER
+  SYSTEM
+}
+
+model User {
+  id       String  @id @default(cuid())
+  publicId String? @unique
+  name     String?
+  email    String  @unique
+  image    String?
+  password String?
+  timezone String  @default("Asia/Jakarta")
+  currency String  @default("IDR")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chats        Chat[]
+  chatSessions ChatSession[]
+  categories   Category[]
+  transactions Transaction[]
+
+  @@map("user")
+}
+
+model Chat {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  telegramChatId String?       @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  sessions       ChatSession[]
+  messages       Message[]
+
+  @@map("chat")
+}
+
+model ChatSession {
+  id String @id @default(cuid())
+
+  chatId String
+  userId String
+
+  linkedAt   DateTime  @default(now())
+  unlinkedAt DateTime?
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id         String     @id @default(cuid())
+  chatId     String
+  chat       Chat       @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  content    String
+  senderType SenderType
+  timestamp  DateTime   @default(now())
+
+  @@map("message")
+}
+
+enum TxType {
+  INCOME
+  EXPENSE
+}
+
+enum TxSource {
+  WEB
+  TELEGRAM
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  type      TxType
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name, type])
+  @@index([userId, type])
+  @@map("category")
+}
+
+model Transaction {
+  id                String   @id @default(cuid())
+  userId            String
+  categoryId        String
+  type              TxType
+  amount            Decimal  @db.Decimal(14, 2)
+  note              String?
+  source            TxSource @default(WEB)
+  /// Unik per pesan Telegram (chatId:messageId) untuk idempotensi webhook.
+  telegramUpdateKey String?  @unique
+  occurredAt        DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@index([userId, occurredAt])
+  @@index([userId, type, occurredAt])
+  @@map("transaction")
+}
