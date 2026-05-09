@@ -22,10 +22,7 @@ export function TrendChart({ data }: { data: TrendDatum[] }) {
   return (
     <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 8, right: 12, left: 12, bottom: 0 }}
-        >
+        <BarChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#2b3139" />
           <XAxis
             dataKey="label"
@@ -58,22 +55,10 @@ export function TrendChart({ data }: { data: TrendDatum[] }) {
           />
           <Legend
             wrapperStyle={{ fontSize: 12, color: "#eaecef" }}
-            formatter={(value) =>
-              value === "income" ? "Pemasukan" : "Pengeluaran"
-            }
+            formatter={(value) => (value === "income" ? "Pemasukan" : "Pengeluaran")}
           />
-          <Bar
-            dataKey="income"
-            fill="#0ecb81"
-            radius={[4, 4, 0, 0]}
-            maxBarSize={28}
-          />
-          <Bar
-            dataKey="expense"
-            fill="#f6465d"
-            radius={[4, 4, 0, 0]}
-            maxBarSize={28}
-          />
+          <Bar dataKey="income" fill="#0ecb81" radius={[4, 4, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="expense" fill="#f6465d" radius={[4, 4, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>
     </div>

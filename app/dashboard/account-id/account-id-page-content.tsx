@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AccountIdCopy } from "./account-id-copy";
 import { CheckCircle2, XCircle } from "lucide-react";
@@ -41,8 +35,8 @@ export function AccountIdPageContent() {
       <div>
         <h1 className="text-2xl font-bold text-ink-strong">Account ID</h1>
         <p className="text-sm text-muted">
-          ID unik kamu untuk menghubungkan akun ke bot Telegram (beberapa akun Telegram
-          boleh pakai ID yang sama).
+          ID unik kamu untuk menghubungkan akun ke bot Telegram (beberapa akun Telegram boleh pakai
+          ID yang sama).
         </p>
       </div>
 
@@ -50,8 +44,7 @@ export function AccountIdPageContent() {
         <CardHeader>
           <CardTitle>Account ID kamu</CardTitle>
           <CardDescription>
-            Bagikan ID ini ke bot Telegram saat menghubungkan sesi. Jangan bagikan ke
-            orang lain.
+            Bagikan ID ini ke bot Telegram saat menghubungkan sesi. Jangan bagikan ke orang lain.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -79,8 +72,8 @@ export function AccountIdPageContent() {
             </div>
             {isConnected && integrations.length > 1 ? (
               <p className="mt-3 text-sm text-muted">
-                Beberapa chat Telegram terhubung ke akun ini (setiap pairing menghasilkan
-                sesi terpisah).
+                Beberapa chat Telegram terhubung ke akun ini (setiap pairing menghasilkan sesi
+                terpisah).
               </p>
             ) : null}
           </div>
@@ -102,8 +95,8 @@ export function AccountIdPageContent() {
               <code className="font-numeric text-primary">{publicId}</code>.
             </li>
             <li>
-              Untuk Telegram lain (HP kedua, dll.), ulangi langkah yang sama dengan ID
-              ini — semua sesi mencatat ke akun Cash Tracker yang sama.
+              Untuk Telegram lain (HP kedua, dll.), ulangi langkah yang sama dengan ID ini — semua
+              sesi mencatat ke akun Cash Tracker yang sama.
             </li>
           </ol>
         </CardContent>

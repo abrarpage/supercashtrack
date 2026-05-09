@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   }
 
   const message = body?.message ?? body?.edited_message;
-  
+
   if (!message) {
     return NextResponse.json({ ok: true });
   }

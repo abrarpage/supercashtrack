@@ -13,12 +13,17 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const type = url.searchParams.get("type");
+    const withoutLimitPagination = url.searchParams.get("withoutLimitPagination");
+    const take = Math.min(Math.max(Number(url.searchParams.get("take") ?? 10), 1), 200);
+    const page = Math.max(1, Number.parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
     const result = await LIST(request, {
       table: "category",
       where: { userId: session.user.id },
-      withoutLimitPagination: true,
+      withoutLimitPagination: withoutLimitPagination === "true",
       QParams: {
         ...(type === "INCOME" || type === "EXPENSE" ? { type } : {}),
+        take,
+        page,
         sort: "type,name",
       },
       returnValue: true,
@@ -67,10 +72,7 @@ export async function POST(request: NextRequest) {
       "code" in err &&
       (err as { code?: string }).code === "P2002"
     ) {
-      return NextResponse.json(
-        { error: "Kategori dengan nama ini sudah ada" },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: "Kategori dengan nama ini sudah ada" }, { status: 409 });
     }
     return handleError(err);
   }

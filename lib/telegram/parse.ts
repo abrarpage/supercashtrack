@@ -4,6 +4,10 @@ import type { ParsedInput } from "./types";
 
 const COMMAND_PREFIX = "/";
 
+function isHashtagToken(token: string): boolean {
+  return token.startsWith("#") && token.length > 1;
+}
+
 /** First line valid CT-XXXXXX → pairing / verification prefix; rest is payload. */
 export function splitLeadingPublicId(text: string): {
   publicId: string | null;
@@ -74,12 +78,28 @@ export function parseTelegramMessage(text: string): ParsedInput {
     const amount = parseAmount(num);
     if (!Number.isFinite(amount) || amount <= 0) return { kind: "unknown" };
 
-    // Format baru: `${nominal} ${category} ${description}`
-    // category = token pertama setelah nominal (1 kata), case-insensitive match di DB.
+    // `${nominal} …` — jika ada `#tag`, itu kategori; kalau tidak, token pertama = kategori.
     const restTrimmed = (rest ?? "").trim();
-    const [categoryRaw, ...descParts] = restTrimmed.split(/\s+/).filter(Boolean);
-    if (!categoryRaw) return { kind: "unknown" };
-    const note = descParts.join(" ").trim() || null;
+    const tokens = restTrimmed.split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) return { kind: "unknown" };
+
+    const hashIdx = tokens.findIndex(isHashtagToken);
+    let categoryRaw: string;
+    let note: string | null;
+    let categorySource: "hashtag" | "plain";
+
+    if (hashIdx !== -1) {
+      categoryRaw = tokens[hashIdx].slice(1);
+      if (!categoryRaw) return { kind: "unknown" };
+      const noteParts = [...tokens.slice(0, hashIdx), ...tokens.slice(hashIdx + 1)];
+      note = noteParts.join(" ").trim() || null;
+      categorySource = "hashtag";
+    } else {
+      const [first, ...descParts] = tokens;
+      categoryRaw = first!;
+      note = descParts.join(" ").trim() || null;
+      categorySource = "plain";
+    }
 
     return {
       kind: "transaction",
@@ -87,6 +107,7 @@ export function parseTelegramMessage(text: string): ParsedInput {
       amount,
       category: categoryRaw,
       note,
+      categorySource,
     };
   }
 

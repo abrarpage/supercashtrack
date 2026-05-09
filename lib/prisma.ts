@@ -12,7 +12,7 @@ function makeClient() {
   });
 }
 
- const prisma: PrismaClient = globalForPrisma.prisma ?? makeClient();
+const prisma: PrismaClient = globalForPrisma.prisma ?? makeClient();
 const prismaAny = prisma as any;
 
 if (process.env.NODE_ENV !== "production") {

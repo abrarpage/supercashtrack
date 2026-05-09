@@ -1,12 +1,7 @@
 "use client";
 import * as React from "react";
-import ReactSelect, {
-  type GroupBase,
-  type Props as RSProps,
-} from "react-select";
-import CreatableSelect, {
-  type CreatableProps,
-} from "react-select/creatable";
+import ReactSelect, { type GroupBase, type Props as RSProps } from "react-select";
+import CreatableSelect, { type CreatableProps } from "react-select/creatable";
 import { cn } from "@/lib/utils";
 
 export type RSOption<T = string> = {

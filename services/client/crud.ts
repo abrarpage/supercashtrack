@@ -22,10 +22,9 @@ export const baseURL = `${process.env.NEXT_PUBLIC_APP_URL}/api`;
 
 export const useApi = () => {
   const { data: session }: any = useSession();
-  console.log("session:",session);
-  console.log("baseURL:",baseURL);
-  
-  
+  console.log("session:", session);
+  console.log("baseURL:", baseURL);
+
   const headers: any = {};
   if (session?.access_token) {
     headers["Authorization"] = `Bearer ${session?.access_token}`;
@@ -90,9 +89,7 @@ export const useApiRead = (
       const { data } = await api.get(`${table}/${id}${queryString}`);
       return data;
     },
-    enabled:
-      enabled ??
-      (isPublic ? !!id && !skip : !!id && !!session?.access_token && !skip),
+    enabled: enabled ?? (isPublic ? !!id && !skip : !!id && !!session?.access_token && !skip),
     placeholderData: (previousData) => previousData,
     throwOnError: false,
     refetchOnWindowFocus: false,
@@ -101,10 +98,7 @@ export const useApiRead = (
   });
 };
 
-export const useApiPost = (
-  table: string,
-  { invalidateKeys = [] }: mutationParams = {},
-) => {
+export const useApiPost = (table: string, { invalidateKeys = [] }: mutationParams = {}) => {
   const queryClient = useQueryClient();
   const { api } = useApi();
   return useMutation({
@@ -125,20 +119,11 @@ export const useApiPost = (
   });
 };
 
-export const useApiPatch = (
-  table: string,
-  { invalidateKeys = [] }: mutationParams = {},
-) => {
+export const useApiPatch = (table: string, { invalidateKeys = [] }: mutationParams = {}) => {
   const queryClient = useQueryClient();
   const { api } = useApi();
   return useMutation({
-    mutationFn: async ({
-      id,
-      payload,
-    }: {
-      id: string | number;
-      payload: any;
-    }) => {
+    mutationFn: async ({ id, payload }: { id: string | number; payload: any }) => {
       return await api.patch(`${table}/${id}`, payload);
     },
     onSuccess: (data, variables, context) => {
@@ -158,10 +143,7 @@ export const useApiPatch = (
   });
 };
 
-export const useApiDelete = (
-  table: string,
-  { invalidateKeys = [] }: mutationParams = {},
-) => {
+export const useApiDelete = (table: string, { invalidateKeys = [] }: mutationParams = {}) => {
   const queryClient = useQueryClient();
   const { api } = useApi();
   return useMutation({
@@ -233,11 +215,7 @@ export const useApiInfiniteList = (
 
   return useInfiniteQuery({
     queryKey: keys ? [...keys, queryString] : [table, queryString],
-    queryFn: async ({
-      pageParam,
-    }: {
-      pageParam: number;
-    }): Promise<listResultInfinite> => {
+    queryFn: async ({ pageParam }: { pageParam: number }): Promise<listResultInfinite> => {
       try {
         const combinedQueryParams = { ...queryParams, page: pageParam };
         const queryString = queryParamsToQs(combinedQueryParams);
@@ -250,8 +228,7 @@ export const useApiInfiniteList = (
     initialPageParam: 1,
     getNextPageParam: (lastPage: any, allPages) => {
       const { meta } = lastPage;
-      const page =
-        typeof meta?.page === "string" ? parseInt(meta?.page) : meta?.page;
+      const page = typeof meta?.page === "string" ? parseInt(meta?.page) : meta?.page;
       const nextPage = page < meta?.pageCount ? page + 1 : undefined;
       return nextPage;
       // return page < meta?.pageCount ? page + 1 : undefined;

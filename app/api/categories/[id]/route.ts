@@ -28,10 +28,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
 
     const existing = await prisma.category.findUnique({ where: { id } });
     if (!existing || existing.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Kategori tidak ditemukan" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Kategori tidak ditemukan" }, { status: 404 });
     }
 
     const updated = await UPDATE(request, {
@@ -49,10 +46,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
       "code" in err &&
       (err as { code?: string }).code === "P2002"
     ) {
-      return NextResponse.json(
-        { error: "Kategori dengan nama ini sudah ada" },
-        { status: 409 },
-      );
+      return NextResponse.json({ error: "Kategori dengan nama ini sudah ada" }, { status: 409 });
     }
     return handleError(err);
   }
@@ -68,10 +62,7 @@ export async function DELETE(request: NextRequest, ctx: Ctx) {
     const { id } = await ctx.params;
     const existing = await prisma.category.findUnique({ where: { id } });
     if (!existing || existing.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Kategori tidak ditemukan" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Kategori tidak ditemukan" }, { status: 404 });
     }
 
     const txCount = await prisma.transaction.count({

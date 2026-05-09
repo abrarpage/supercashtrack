@@ -82,13 +82,7 @@ export async function handleTelegramUpdate(message: TelegramMessage) {
   const chats = await loadChatsForUser(linkedUserId);
 
   if (parsedInner.kind === "command") {
-    return handlePrivilegedCommand(
-      parsedInner.command,
-      message,
-      linkedUserId,
-      chats,
-      chatRowId,
-    );
+    return handlePrivilegedCommand(parsedInner.command, message, linkedUserId, chats, chatRowId);
   }
 
   if (parsedInner.kind === "transaction") {
@@ -114,9 +108,7 @@ type LinkedChatContext = {
   chatRowId: string;
 };
 
-async function getLinkedChatContext(
-  telegramChatId: number,
-): Promise<LinkedChatContext | null> {
+async function getLinkedChatContext(telegramChatId: number): Promise<LinkedChatContext | null> {
   const chat = await prisma.chat.findUnique({
     where: { telegramChatId: String(telegramChatId) },
     select: {
@@ -295,12 +287,8 @@ async function handlePrivilegedCommand(
         where: { userId },
         _sum: { amount: true },
       });
-      const income = Number(
-        grouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0,
-      );
-      const expense = Number(
-        grouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0,
-      );
+      const income = Number(grouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0);
+      const expense = Number(grouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0);
       const reply = replyBalance({ balance: income - expense, income, expense }) + appendix;
       if (chatRowId) {
         await sendTelegramMessageAndStore(chatRowId, chatId, reply);
@@ -341,12 +329,8 @@ async function handlePrivilegedCommand(
     }
     default: {
       if (chatRowId) {
-        console.log("chatRowId:",chatRowId);
-        
         await sendTelegramMessageAndStore(chatRowId, chatId, REPLY_HELP);
       } else {
-        console.log("telegramChatId:",chatId);
-        
         await sendTelegramMessage(chatId, REPLY_HELP);
       }
       return;
@@ -364,10 +348,7 @@ function isPrismaUniqueViolation(err: unknown): boolean {
 }
 
 async function handleTransaction(
-  parsed: Extract<
-    ReturnType<typeof parseTelegramMessage>,
-    { kind: "transaction" }
-  >,
+  parsed: Extract<ReturnType<typeof parseTelegramMessage>, { kind: "transaction" }>,
   userId: string,
   chatId: number,
   telegramMessageId: number,
@@ -377,16 +358,43 @@ async function handleTransaction(
   const appendix = formatFilteredChatAppendix(chats);
 
   const wantedCategory = (parsed.category ?? "").trim().toLowerCase();
-  let category =
-    (wantedCategory
-      ? await prisma.category.findFirst({
+  let category = wantedCategory
+    ? await prisma.category.findFirst({
+        where: {
+          userId,
+          type: parsed.type,
+          name: { equals: wantedCategory, mode: "insensitive" },
+        },
+      })
+    : null;
+
+  if (!category && parsed.categorySource === "hashtag" && wantedCategory) {
+    try {
+      category = await prisma.category.create({
+        data: {
+          userId,
+          name: titleCase(wantedCategory),
+          type: parsed.type,
+          isDefault: false,
+        },
+      });
+    } catch (err) {
+      if (isPrismaUniqueViolation(err)) {
+        category = await prisma.category.findFirst({
           where: {
             userId,
             type: parsed.type,
             name: { equals: wantedCategory, mode: "insensitive" },
           },
-        })
-      : null) ??
+        });
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  category =
+    category ??
     (await prisma.category.findFirst({
       where: { userId, type: parsed.type, name: FALLBACK_CATEGORY_NAME },
     }));
@@ -440,10 +448,7 @@ async function handleTransaction(
   }
 }
 
-async function storeIncomingIfPossible(
-  chatRowId: string | null,
-  rawText: string,
-): Promise<void> {
+async function storeIncomingIfPossible(chatRowId: string | null, rawText: string): Promise<void> {
   if (!chatRowId) return;
   const content = rawText.trim();
   if (!content) return;

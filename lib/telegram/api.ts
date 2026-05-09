@@ -5,10 +5,7 @@ function token() {
   return process.env.TELEGRAM_BOT_TOKEN ?? "";
 }
 
-export async function sendTelegramMessage(
-  chatId: number | string,
-  text: string,
-): Promise<void> {
+export async function sendTelegramMessage(chatId: number | string, text: string): Promise<void> {
   const t = token();
 
   if (!t) {

@@ -1,43 +1,36 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import {
-  ArrowRight,
-  Bot,
-  ListChecks,
-  PieChart,
-  ShieldCheck,
-} from "lucide-react";
+
+import { ArrowRight, Bot, ListChecks, PieChart, ShieldCheck } from "lucide-react";
+import { generateMetadata as genMeta } from "@/lib/seo";
+import PublicHeader from "@/components/layout/PublicHeader";
+import PublicFooter from "@/components/layout/PublicFooter";
+
+export const metadata = genMeta({
+  title: "SuperCashTrack | Catat keuangan lewat Telegram",
+  description:
+    "SuperCashTrack membantu kamu mencatat pemasukan dan pengeluaran langsung dari Telegram. Ringkas, otomatis terklasifikasi, dan mudah dipantau dari dashboard web.",
+  keywords: [
+    "supercashtrack",
+    "catat keuangan telegram",
+    "pencatatan keuangan",
+    "pemasukan pengeluaran",
+    "budget harian",
+    "finansial pribadi",
+    "indonesia",
+  ],
+  url: "/",
+});
 
 export default async function LandingPage() {
-  const session = await auth();
-  if (session?.user) {
-    redirect("/dashboard");
-  }
-
   return (
     <div className="flex min-h-screen flex-col">
       {/* Top nav */}
-      <header className="border-b border-hairline">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-md bg-primary text-on-primary font-bold">
-              ¢
-            </div>
-            <span className="text-lg font-bold tracking-tight text-primary">
-              CASH TRACKER
-            </span>
-          </div>
-          <Button asChild size="pill">
-            <Link href="/login">Masuk</Link>
-          </Button>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero */}
       <section className="flex-1">
-        <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
+        <div className="mx-auto wrapper py-20 lg:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div className="flex flex-col gap-6">
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-hairline bg-surface-card px-3 py-1 text-xs text-muted">
@@ -49,9 +42,8 @@ export default async function LandingPage() {
                 <span className="text-primary">secepat mengetik chat.</span>
               </h1>
               <p className="max-w-xl text-base text-muted md:text-lg">
-                Cukup kirim &ldquo;15000 beli es krim&rdquo; ke bot Telegram —
-                kami yang catat. Lihat rekap, kategori, dan tren pengeluaran
-                kamu langsung dari dashboard.
+                Cukup kirim &ldquo;15000 beli es krim&rdquo; ke bot Telegram — kami yang catat.
+                Lihat rekap, kategori, dan tren pengeluaran kamu langsung dari dashboard.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="pill">
@@ -113,10 +105,7 @@ export default async function LandingPage() {
                       kind: "expense",
                     },
                   ].map((row, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between text-sm"
-                    >
+                    <div key={i} className="flex items-center justify-between text-sm">
                       <div>
                         <div className="text-ink">{row.note}</div>
                         <div className="text-xs text-muted">{row.cat}</div>
@@ -124,9 +113,7 @@ export default async function LandingPage() {
                       <div
                         className={
                           "font-numeric font-medium " +
-                          (row.kind === "income"
-                            ? "text-trading-up"
-                            : "text-trading-down")
+                          (row.kind === "income" ? "text-trading-up" : "text-trading-down")
                         }
                       >
                         {row.amount}
@@ -141,7 +128,7 @@ export default async function LandingPage() {
 
         {/* Features */}
         <div id="fitur" className="border-t border-hairline bg-surface-card/40">
-          <div className="mx-auto max-w-6xl px-6 py-20">
+          <div className="mx-auto wrapper py-20">
             <h2 className="text-center text-3xl font-bold text-ink-strong">
               Sederhana. Cepat. Terstruktur.
             </h2>
@@ -168,16 +155,11 @@ export default async function LandingPage() {
                   desc: "Login lewat Google. Account ID rahasia khusus untuk hubungkan ke Telegram.",
                 },
               ].map((f, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl border border-hairline bg-surface-card p-6"
-                >
+                <div key={i} className="rounded-xl border border-hairline bg-surface-card p-6">
                   <div className="grid h-10 w-10 place-items-center rounded-md bg-primary/15 text-primary [&_svg]:size-5">
                     {f.icon}
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-ink-strong">
-                    {f.title}
-                  </h3>
+                  <h3 className="mt-4 text-base font-semibold text-ink-strong">{f.title}</h3>
                   <p className="mt-2 text-sm text-muted">{f.desc}</p>
                 </div>
               ))}
@@ -187,12 +169,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-hairline">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-6 text-xs text-muted md:flex-row">
-          <span>© 2026 Cash Tracker. Dibuat dengan teliti.</span>
-          <span>Catatan keuanganmu, di ujung jari.</span>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

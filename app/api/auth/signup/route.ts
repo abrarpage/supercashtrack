@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const parsed = signupSchema.safeParse(body);
   console.log("parsed:", parsed);
-  
+
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Data tidak valid", issues: parsed.error.issues },
@@ -21,10 +21,7 @@ export async function POST(request: Request) {
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return NextResponse.json(
-      { error: "Email sudah terdaftar" },
-      { status: 409 },
-    );
+    return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 409 });
   }
 
   const hashed = hashPassword(password);
@@ -52,10 +49,7 @@ export async function POST(request: Request) {
   }
 
   if (!userId) {
-    return NextResponse.json(
-      { error: "Gagal membuat akun, coba lagi" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Gagal membuat akun, coba lagi" }, { status: 500 });
   }
 
   const newUserId = userId;
