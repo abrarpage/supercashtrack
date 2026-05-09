@@ -9,10 +9,11 @@ export const REPLY_WELCOME_BACK = (firstName?: string | null) =>
   `Halo${firstName ? `, ${firstName}` : ""}! Akun kamu sudah terhubung.
 
 Sekarang kamu bisa langsung mencatat transaksi tanpa menulis Account ID lagi:
-<pre>15000 beli es krim</pre>
+<pre>15000 beli kopi #makan</pre>
+(<code>#makan</code> = kategori; bisa juga tanpa hashtag: <pre>15000 makan beli kopi</pre>)
 
 Kalau kamu ingin ganti akun (re-pair), cukup kirim Account ID lagi, atau pakai prefix satu baris:
-<pre>CT-8F29XQ 15000 beli es krim</pre>
+<pre>CT-8F29XQ 15000 beli kopi #makan</pre>
 
 Ketik /bantuan untuk daftar perintah.`;
 
@@ -27,10 +28,10 @@ export const REPLY_LINK_SUCCESS = (publicId: string) =>
   `✅ Berhasil terhubung ke akun <code>${publicId}</code>.
 
 Sekarang kamu bisa langsung mencatat transaksi:
-<pre>15000 beli es krim</pre>
+<pre>15000 beli kopi #makan</pre>
 
 Kalau ingin ganti akun (re-pair), kirim Account ID lagi, atau pakai prefix:
-<pre>${publicId} 15000 beli es krim</pre>
+<pre>${publicId} 15000 beli kopi #makan</pre>
 
 Ketik /bantuan untuk daftar perintah.`;
 
@@ -49,8 +50,8 @@ Pastikan kamu sudah mengirim Account ID saja (satu baris) untuk menghubungkan, l
 
 export const REPLY_UNKNOWN_FORMAT = `Format tidak dikenali.
 Contoh format:
-• Pengeluaran : <code>15000 makan beli es krim</code>
-• Pemasukan  : <code>+500000 gaji freelance</code>
+• Pengeluaran : <code>15000 beli es krim #makan</code> atau <code>15000 makan beli es krim</code>
+• Pemasukan  : <code>+800000 #gaji</code> atau <code>+500000 gaji freelance</code>
 
 Ketik /bantuan untuk daftar perintah.`;
 
@@ -61,13 +62,14 @@ export const REPLY_HELP = `📋 Daftar perintah:
 /putuskan — putuskan koneksi
 
 Format mencatat transaksi:
-• <code>15000 makan beli es krim</code> → pengeluaran
-• <code>+500000 gaji freelance</code> → pemasukan
-• Bentuk: <code>{nominal} {category} {deskripsi}</code> (category 1 kata)
+• <code>15000 beli es krim #makan</code> → pengeluaran (kategori dari <code>#makan</code>)
+• <code>15000 makan beli es krim</code> → pengeluaran (kategori kata pertama: <code>makan</code>)
+• <code>+800000 #gaji</code> → pemasukan; kategori baru dari hashtag dibuat otomatis jika belum ada
+• <code>+500000 gaji freelance</code> → pemasukan (tanpa hashtag)
 
 Ganti akun (re-pair) kapan saja:
 • Kirim Account ID saja: <code>CT-8F29XQ</code>
-• Atau prefix: <code>CT-8F29XQ 15000 makan beli kopi</code>`;
+• Atau prefix: <code>CT-8F29XQ 15000 beli kopi #makan</code>`;
 
 export type TelegramChatSummary = {
   id: string;
@@ -75,9 +77,7 @@ export type TelegramChatSummary = {
 };
 
 /** Riwayat chat aplikasi (model Chat/Message), sudah difilter per akun. */
-export function formatFilteredChatAppendix(
-  chats: TelegramChatSummary[],
-): string {
+export function formatFilteredChatAppendix(chats: TelegramChatSummary[]): string {
   const flat = chats.flatMap((c) =>
     c.messages.map((m) => ({
       chatId: c.id,
@@ -91,8 +91,7 @@ export function formatFilteredChatAppendix(
   }
   const lines = take.map((m) => {
     const t = formatDateID(m.timestamp);
-    const short =
-      m.content.length > 120 ? `${m.content.slice(0, 117)}…` : m.content;
+    const short = m.content.length > 120 ? `${m.content.slice(0, 117)}…` : m.content;
     return `• ${t} · ${m.senderType}: ${short}`;
   });
   return `\n\n---\n📜 <b>Riwayat chat aplikasi</b> (akun ini saja):\n${lines.join("\n")}`;
@@ -111,9 +110,7 @@ export function replyTransactionRecorded(args: {
   occurredAt: Date;
 }): string {
   const isIncome = args.type === "INCOME";
-  const title = isIncome
-    ? "✅ Pemasukan berhasil dicatat!"
-    : "✅ Pengeluaran berhasil dicatat!";
+  const title = isIncome ? "✅ Pemasukan berhasil dicatat!" : "✅ Pengeluaran berhasil dicatat!";
   const tanggal = formatDateID(args.occurredAt);
   const jumlah = formatIDR(args.amount);
   const catatan = args.note ?? "(tanpa catatan)";
@@ -124,11 +121,7 @@ Catatan  : ${catatan}
 Kategori : ${args.categoryName}`;
 }
 
-export function replyBalance(args: {
-  balance: number;
-  income: number;
-  expense: number;
-}): string {
+export function replyBalance(args: { balance: number; income: number; expense: number }): string {
   return `💰 <b>Saldo kamu</b>
 Saldo saat ini : <b>${formatIDR(args.balance)}</b>
 Total pemasukan : ${formatIDR(args.income)}

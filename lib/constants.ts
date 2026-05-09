@@ -1,20 +1,9 @@
 // Default categories yang otomatis di-seed saat user pertama kali daftar.
 import type { TxType } from "./generated/prisma/enums";
 
-export const DEFAULT_EXPENSE_CATEGORIES = [
-  "Makan",
-  "Transportasi",
-  "Belanja",
-  "Lainnya",
-];
+export const DEFAULT_EXPENSE_CATEGORIES = ["Makan", "Transportasi", "Belanja", "Lainnya"];
 
-export const DEFAULT_INCOME_CATEGORIES = [
-  "Gaji",
-  "Freelance",
-  "Bonus",
-
-  "Lainnya",
-];
+export const DEFAULT_INCOME_CATEGORIES = ["Gaji", "Freelance", "Bonus", "Lainnya"];
 
 export const FALLBACK_CATEGORY_NAME = "Lainnya";
 

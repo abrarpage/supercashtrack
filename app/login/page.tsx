@@ -46,9 +46,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <h1 className="text-2xl font-bold tracking-tight text-ink-strong">
             Masuk ke Cash Tracker
           </h1>
-          <p className="text-sm text-muted">
-            Lacak pemasukan dan pengeluaran kamu lewat Telegram.
-          </p>
+          <p className="text-sm text-muted">Lacak pemasukan dan pengeluaran kamu lewat Telegram.</p>
         </div>
 
         <div className="rounded-xl border border-hairline bg-surface-card p-6">
@@ -91,12 +89,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
 function GoogleIcon() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      className="h-4 w-4"
-      aria-hidden
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09Z"

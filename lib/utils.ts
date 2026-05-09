@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import * as qs from "qs";
@@ -17,9 +16,7 @@ export const queryParamsToQs = (
   // Filter out empty values
   let filteredParams = { ...queryParams };
   if (deleteEmpty) {
-    filteredParams = Object.fromEntries(
-      Object.entries(queryParams).filter(([_, value]) => value),
-    );
+    filteredParams = Object.fromEntries(Object.entries(queryParams).filter(([_, value]) => value));
   }
 
   const withParams = Object.keys(filteredParams)?.length;
@@ -80,14 +77,8 @@ export function formatOffsetInCall(seconds: number) {
   return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
-export function formatConversationDateLabel(
-  startUnixSecs: number | null | undefined,
-) {
-  if (
-    typeof startUnixSecs !== "number" ||
-    !Number.isFinite(startUnixSecs) ||
-    startUnixSecs <= 0
-  ) {
+export function formatConversationDateLabel(startUnixSecs: number | null | undefined) {
+  if (typeof startUnixSecs !== "number" || !Number.isFinite(startUnixSecs) || startUnixSecs <= 0) {
     return null;
   }
   const d = dayjs.unix(Math.floor(startUnixSecs)).startOf("day");
@@ -105,9 +96,7 @@ export function formatMessageTime(
     startUnixSecs > 0 &&
     Number.isFinite(timeInCallSecs)
   ) {
-    return dayjs
-      .unix(Math.floor(startUnixSecs + timeInCallSecs))
-      .format("HH:mm");
+    return dayjs.unix(Math.floor(startUnixSecs + timeInCallSecs)).format("HH:mm");
   }
   return formatOffsetInCall(timeInCallSecs);
 }

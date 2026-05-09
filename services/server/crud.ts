@@ -100,9 +100,7 @@ export const LIST = async (
     });
     sortingDataWithParams(query.sort, params);
     const [data, count] = await Promise.all([
-      prismaAny[dbTable].findMany(
-        !!distinct?.length ? { distinct, ...params } : params,
-      ),
+      prismaAny[dbTable].findMany(!!distinct?.length ? { distinct, ...params } : params),
       prismaAny[dbTable].count({ where: params.where }),
     ]);
 
@@ -112,9 +110,7 @@ export const LIST = async (
         count,
         take: take || (withoutLimitPagination ? count : 10),
         page: page || 1,
-        pageCount: Math.ceil(
-          count / (take || (withoutLimitPagination ? count : 10)),
-        ),
+        pageCount: Math.ceil(count / (take || (withoutLimitPagination ? count : 10))),
       },
     };
     if (returnValue) {
@@ -123,9 +119,7 @@ export const LIST = async (
     return NextResponse.json(result);
   } catch (error: any) {
     if (returnValue) {
-      throw new Error(
-        `${error?.status || "500"}-${error?.message || "something went wrong"}`,
-      );
+      throw new Error(`${error?.status || "500"}-${error?.message || "something went wrong"}`);
     }
     return handleError(error);
   }
@@ -133,15 +127,7 @@ export const LIST = async (
 
 export const READ = async (
   req: NextRequest,
-  {
-    params: p,
-    include = {},
-    select = {},
-    where,
-    returnValue,
-    table,
-    key = "id",
-  }: args,
+  { params: p, include = {}, select = {}, where, returnValue, table, key = "id" }: args,
 ) => {
   try {
     const dbTable = table || findTable(req);
@@ -156,9 +142,7 @@ export const READ = async (
     return NextResponse.json(result);
   } catch (error: any) {
     if (returnValue) {
-      throw new Error(
-        `${error?.status || "500"}-${error?.message || "something went wrong"}`,
-      );
+      throw new Error(`${error?.status || "500"}-${error?.message || "something went wrong"}`);
     }
     return handleError(error);
   }
@@ -166,16 +150,7 @@ export const READ = async (
 
 export const UPDATE = async (
   req: NextRequest,
-  {
-    params: p,
-    include = {},
-    select = {},
-    where = {},
-    returnValue,
-    body,
-    table,
-    key = "id",
-  }: args,
+  { params: p, include = {}, select = {}, where = {}, returnValue, body, table, key = "id" }: args,
 ) => {
   try {
     const { id } = await p;

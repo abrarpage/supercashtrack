@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CategoryFormDialog } from "./category-form-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { Pagination } from "@/components/Pagination";
 import { useApiDelete, useApiList } from "@/services/client/crud";
 
 type CatType = "INCOME" | "EXPENSE";
+const CATEGORIES_PAGE_SIZE = 10;
 
 interface Category {
   id: string;
@@ -24,29 +26,54 @@ function getErrorMessage(error: unknown, fallback: string) {
     typeof error === "object" &&
     error !== null &&
     "response" in error &&
-    typeof (error as { response?: { data?: { error?: string } } }).response?.data
-      ?.error === "string"
+    typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error ===
+      "string"
   ) {
-    return (error as { response?: { data?: { error?: string } } }).response!.data!
-      .error!;
+    return (error as { response?: { data?: { error?: string } } }).response!.data!.error!;
   }
   return fallback;
 }
 
 export function CategoriesPageContent() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
-    null,
-  );
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { data, isLoading } = useApiList ("categories", {
-    queryParams: { take: 1000, page: 1, sort: "type,name" },
-  });
-  const categories = (data?.data ?? []) as Category[];
-  const deleteCategory = useApiDelete ("categories");
+  const [tab, setTab] = useState<"expense" | "income">("expense");
+  const [page, setPage] = useState(1);
+  const [take, setTake] = useState(CATEGORIES_PAGE_SIZE);
 
-  const expenses = categories.filter((c) => c.type === "EXPENSE");
-  const incomes = categories.filter((c) => c.type === "INCOME");
+  const currentType: CatType = tab === "expense" ? "EXPENSE" : "INCOME";
+
+  const { data, isLoading } = useApiList("categories", {
+    queryParams: {
+      take,
+      page,
+      type: currentType,
+      sort: "type,name",
+    },
+  });
+  const expenseCountQuery = useApiList("categories", {
+    queryParams: { take: 1, page: 1, type: "EXPENSE", sort: "type,name" },
+  });
+  const incomeCountQuery = useApiList("categories", {
+    queryParams: { take: 1, page: 1, type: "INCOME", sort: "type,name" },
+  });
+
+  const categories = (data?.data ?? []) as Category[];
+  const meta = data?.meta;
+  const deleteCategory = useApiDelete("categories");
+
+  const expenseCount = expenseCountQuery.data?.meta?.count ?? 0;
+  const incomeCount = incomeCountQuery.data?.meta?.count ?? 0;
+
+  useEffect(() => {
+    setPage(1);
+  }, [tab]);
+
+  useEffect(() => {
+    const pageCount = meta?.pageCount ?? 0;
+    if (pageCount > 0 && page > pageCount) setPage(pageCount);
+  }, [meta?.pageCount, page]);
 
   async function handleDelete() {
     if (!deletingCategory) return;
@@ -64,9 +91,7 @@ export function CategoriesPageContent() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink-strong">Kategori</h1>
-          <p className="text-sm text-muted">
-            Atur kategori pemasukan dan pengeluaran kamu.
-          </p>
+          <p className="text-sm text-muted">Atur kategori pemasukan dan pengeluaran kamu.</p>
         </div>
         <Button
           onClick={() => {
@@ -79,17 +104,15 @@ export function CategoriesPageContent() {
         </Button>
       </div>
 
-      <Tabs defaultValue="expense">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "expense" | "income")}>
         <TabsList>
-          <TabsTrigger value="expense">
-            Pengeluaran ({expenses.length})
-          </TabsTrigger>
-          <TabsTrigger value="income">Pemasukan ({incomes.length})</TabsTrigger>
+          <TabsTrigger value="expense">Pengeluaran ({expenseCount})</TabsTrigger>
+          <TabsTrigger value="income">Pemasukan ({incomeCount})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="expense">
           <CategoryGrid
-            categories={expenses}
+            categories={categories}
             onEdit={(c) => {
               setEditingCategory(c);
               setIsDialogOpen(true);
@@ -99,7 +122,7 @@ export function CategoriesPageContent() {
         </TabsContent>
         <TabsContent value="income">
           <CategoryGrid
-            categories={incomes}
+            categories={categories}
             onEdit={(c) => {
               setEditingCategory(c);
               setIsDialogOpen(true);
@@ -115,6 +138,18 @@ export function CategoriesPageContent() {
             Memuat kategori...
           </CardContent>
         </Card>
+      ) : null}
+
+      {!isLoading && meta && meta.count > CATEGORIES_PAGE_SIZE ? (
+        <Pagination
+          className="pt-2"
+          totalPages={meta.pageCount}
+          totalItems={meta.count}
+          currentPage={page}
+          take={take}
+          onTakeChange={setTake}
+          onPageChange={setPage}
+        />
       ) : null}
 
       <CategoryFormDialog
@@ -135,9 +170,7 @@ export function CategoriesPageContent() {
         onOpenChange={(o) => !o && setDeletingCategory(null)}
         title="Hapus kategori?"
         description={
-          deletingCategory
-            ? `Kategori "${deletingCategory.name}" akan dihapus permanen.`
-            : ""
+          deletingCategory ? `Kategori "${deletingCategory.name}" akan dihapus permanen.` : ""
         }
         confirmLabel="Hapus"
         confirmVariant="destructive"
@@ -177,28 +210,15 @@ function CategoryGrid({
                 <span className="font-medium text-ink-strong">{c.name}</span>
                 {c.isDefault && <Badge variant="outline">Default</Badge>}
               </div>
-              <Badge
-                variant={c.type === "INCOME" ? "income" : "expense"}
-                className="mt-2"
-              >
+              <Badge variant={c.type === "INCOME" ? "income" : "expense"} className="mt-2">
                 {c.type === "INCOME" ? "Pemasukan" : "Pengeluaran"}
               </Badge>
             </div>
             <div className="flex gap-1">
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onEdit(c)}
-                aria-label="Edit"
-              >
+              <Button size="icon" variant="ghost" onClick={() => onEdit(c)} aria-label="Edit">
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={() => onDelete(c)}
-                aria-label="Hapus"
-              >
+              <Button size="icon" variant="ghost" onClick={() => onDelete(c)} aria-label="Hapus">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>

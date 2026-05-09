@@ -1,14 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Bot,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-} from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Bot, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +28,7 @@ type DashboardSummary = {
 };
 
 export function DashboardPageContent() {
-  const { data, isLoading } = useApiAnyGet ("dashboard/summary");
+  const { data, isLoading } = useApiAnyGet("dashboard/summary");
   const summary = (data?.data ?? null) as DashboardSummary | null;
 
   if (isLoading || !summary) {
@@ -52,9 +45,7 @@ export function DashboardPageContent() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-ink-strong">Dashboard</h1>
-        <p className="text-sm text-muted">
-          Ringkasan keuangan kamu dalam satu layar.
-        </p>
+        <p className="text-sm text-muted">Ringkasan keuangan kamu dalam satu layar.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -72,9 +63,7 @@ export function DashboardPageContent() {
             >
               {formatIDR(summary.balance)}
             </div>
-            <p className="mt-1 text-xs text-muted">
-              Pemasukan dikurangi pengeluaran
-            </p>
+            <p className="mt-1 text-xs text-muted">Pemasukan dikurangi pengeluaran</p>
           </CardContent>
         </Card>
 
@@ -93,9 +82,7 @@ export function DashboardPageContent() {
 
         <Card>
           <CardHeader className="flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted">
-              Total pengeluaran
-            </CardTitle>
+            <CardTitle className="text-sm text-muted">Total pengeluaran</CardTitle>
             <ArrowDownRight className="h-4 w-4 text-trading-down" />
           </CardHeader>
           <CardContent>
@@ -108,9 +95,7 @@ export function DashboardPageContent() {
 
         <Card>
           <CardHeader className="flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted">
-              Kategori pemasukan teratas
-            </CardTitle>
+            <CardTitle className="text-sm text-muted">Kategori pemasukan teratas</CardTitle>
             <TrendingUp className="h-4 w-4 text-trading-up" />
           </CardHeader>
           <CardContent>
@@ -131,9 +116,7 @@ export function DashboardPageContent() {
 
         <Card>
           <CardHeader className="flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted">
-              Kategori pengeluaran teratas
-            </CardTitle>
+            <CardTitle className="text-sm text-muted">Kategori pengeluaran teratas</CardTitle>
             <TrendingDown className="h-4 w-4 text-trading-down" />
           </CardHeader>
           <CardContent>
@@ -198,10 +181,7 @@ export function DashboardPageContent() {
           ) : (
             <div className="divide-y divide-hairline">
               {summary.recentTransactions.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between gap-4 px-6 py-3"
-                >
+                <div key={t.id} className="flex items-center justify-between gap-4 px-6 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-ink-strong truncate">
                       {t.note ?? "(tanpa catatan)"}
@@ -211,17 +191,13 @@ export function DashboardPageContent() {
                         {t.categoryName}
                       </Badge>
                       <span>{formatDateShortID(t.occurredAt)}</span>
-                      {t.source === "TELEGRAM" && (
-                        <span className="text-primary">· Telegram</span>
-                      )}
+                      {t.source === "TELEGRAM" && <span className="text-primary">· Telegram</span>}
                     </div>
                   </div>
                   <div
                     className={
                       "font-numeric whitespace-nowrap font-semibold " +
-                      (t.type === "INCOME"
-                        ? "text-trading-up"
-                        : "text-trading-down")
+                      (t.type === "INCOME" ? "text-trading-up" : "text-trading-down")
                     }
                   >
                     {t.type === "INCOME" ? "+" : "−"}
