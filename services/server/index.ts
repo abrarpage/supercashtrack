@@ -22,15 +22,13 @@ interface QueryFilterResult {
   OR?: KeyObject[];
 }
 
-export const BadRequest = (message: string) =>
-  NextResponse.json({ message }, { status: 400 });
+export const BadRequest = (message: string) => NextResponse.json({ message }, { status: 400 });
 
 // const isDev = process.env.NODE_ENV == "development";
 export const headers = { "Content-Type": "application/json" };
 export const uploadFolderPath = path.join(process.cwd(), "public", "uploads");
 
-const getCustomStatusError = (message: string) =>
-  Number(message?.substring?.(0, 3));
+const getCustomStatusError = (message: string) => Number(message?.substring?.(0, 3));
 
 function isCustomError(message: string) {
   const dashIndex = message?.indexOf("-");
@@ -106,10 +104,7 @@ const handleQuerySearch = (queryFilter: SearchFilter): QueryFilterResult => {
   if (search && keys) {
     const searchValues = search.split(",");
     const Keys = keys.split(",");
-    const createObject = (
-      keysArray: string[],
-      searchValue: string,
-    ): KeyObject => {
+    const createObject = (keysArray: string[], searchValue: string): KeyObject => {
       const key = keysArray[0];
       const remainingKeys = keysArray.slice(1);
       if (remainingKeys.length === 0) {
@@ -119,9 +114,7 @@ const handleQuerySearch = (queryFilter: SearchFilter): QueryFilterResult => {
     };
     const transformedKeys = Keys.flatMap((key) => {
       const keyArray = key.split(".");
-      return searchValues.map((searchValue) =>
-        createObject(keyArray, searchValue),
-      );
+      return searchValues.map((searchValue) => createObject(keyArray, searchValue));
     });
     return { OR: transformedKeys };
   }
@@ -132,8 +125,7 @@ export const parseFilter = (QFilter: any) => {
   const where: any = {};
   let searchQuery = {};
   if (QFilter) {
-    const { page, take, sort, monthYear, monthYearKey, ...queryFilter } =
-      QFilter;
+    const { page, take, sort, monthYear, monthYearKey, ...queryFilter } = QFilter;
     removeEmptyStringFromObj(queryFilter);
     if (queryFilter.search && queryFilter.keys) {
       searchQuery = handleQuerySearch(queryFilter);
@@ -143,9 +135,7 @@ export const parseFilter = (QFilter: any) => {
 
     if (monthYear && monthYearKey) {
       const startDate = new Date(monthYear as any);
-      const endDate = new Date(
-        new Date(startDate).setMonth(startDate.getMonth() + 1),
-      );
+      const endDate = new Date(new Date(startDate).setMonth(startDate.getMonth() + 1));
       where[monthYearKey] = {
         gte: startDate,
         lt: endDate,
@@ -215,8 +205,7 @@ export const parseFilter = (QFilter: any) => {
         if (value.lt) where[k] = { lt: validate(value.lt) };
         if (value.gte) where[k] = { gte: validate(value.gte) };
         if (value.lte) where[k] = { lte: validate(value.lte) };
-        if (value.like)
-          where[k] = { contains: validate(value.like), mode: "insensitive" };
+        if (value.like) where[k] = { contains: validate(value.like), mode: "insensitive" };
         // where[k] = { contains: validate(value.like) };
       } else {
         where[k] = validate(value);
@@ -310,26 +299,19 @@ export const sortingDataWithParams = (querySort: any, params: any) => {
   return params;
 };
 
-export function parseInclude(
-  data: string | Record<string, any>,
-): Record<string, any> {
+export function parseInclude(data: string | Record<string, any>): Record<string, any> {
   if (typeof data === "string") {
     // Case 1: data is a comma-separated string
-    return data
-      .split(",")
-      .reduce((acc: Record<string, boolean>, item: string) => {
-        acc[item.trim()] = true;
-        return acc;
-      }, {});
+    return data.split(",").reduce((acc: Record<string, boolean>, item: string) => {
+      acc[item.trim()] = true;
+      return acc;
+    }, {});
   } else if (typeof data === "object" && !Array.isArray(data)) {
     // Case 2: data is an object
     const parseObject = (obj: Record<string, any>): Record<string, any> => {
       const result: Record<string, any> = {};
       for (const key in obj) {
-        if (
-          typeof obj[key] === "string" &&
-          (obj[key] === "true" || obj[key] === "false")
-        ) {
+        if (typeof obj[key] === "string" && (obj[key] === "true" || obj[key] === "false")) {
           result[key] = obj[key] === "true";
         } else if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
           result[key] = parseObject(obj[key]);
@@ -411,9 +393,7 @@ export function extractJSON(inputString: string) {
       const jsonData = JSON.parse(match[1].trim());
       jsonBlocks.push(jsonData);
       const key = Object.keys(jsonData)[0];
-      modifiedString = modifiedString
-        .replace(match[0], `__${key + index}__`)
-        .trim();
+      modifiedString = modifiedString.replace(match[0], `__${key + index}__`).trim();
       index++;
     } catch (error) {
       console.error("Failed to parse JSON:", error);
@@ -448,10 +428,7 @@ export function isValidKey(key: string): boolean {
 
 export function sanitizeFileName(fileName: string): string {
   // Allow only valid S3 key characters, replace others with `_`
-  return fileName.replace(
-    /[^(\w|\/|!|-|\.|\*|'|\(|\)| |&|\$|@|=|;|:|\+|,|\?)]/g,
-    "_",
-  );
+  return fileName.replace(/[^(\w|\/|!|-|\.|\*|'|\(|\)| |&|\$|@|=|;|:|\+|,|\?)]/g, "_");
 }
 export function timeStampToDateTime(timestamp: number) {
   if (timestamp) {

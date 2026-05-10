@@ -1,16 +1,8 @@
 import { z } from "zod";
 
 export const updateSettingsSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .max(80, { message: "Nama maksimal 80 karakter" })
-    .optional(),
-  timezone: z
-    .string()
-    .trim()
-    .max(50, { message: "Timezone tidak valid" })
-    .optional(),
+  name: z.string().trim().max(80, { message: "Nama maksimal 80 karakter" }).optional(),
+  timezone: z.string().trim().max(50, { message: "Timezone tidak valid" }).optional(),
   currency: z
     .string()
     .trim()

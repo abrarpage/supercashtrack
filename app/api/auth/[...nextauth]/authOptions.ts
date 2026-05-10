@@ -80,8 +80,7 @@ export const authOptions = {
             data: {
               email,
               name: profile.name ?? null,
-              image:
-                typeof profile.picture === "string" ? profile.picture : null,
+              image: typeof profile.picture === "string" ? profile.picture : null,
             },
           });
           await provisionNewOAuthUser(dbUser.id);

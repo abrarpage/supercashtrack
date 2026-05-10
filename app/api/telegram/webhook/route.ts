@@ -3,19 +3,26 @@
 import { NextResponse } from "next/server";
 import { handleTelegramUpdate } from "@/lib/telegram/handler";
 import type { TelegramUpdate } from "@/lib/telegram/types";
+import { handleError } from "@/services/server";
 
 // Selalu jalankan dinamis, jangan di-cache.
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  try {
+    
+
   // Validasi secret token (jika diset)
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (expectedSecret) {
     const got = request.headers.get("x-telegram-bot-api-secret-token");
     if (got !== expectedSecret) {
+      console.log("secret not found");
+      
       // Pelanggar webhook secret — tetap balas 200 agar tidak ada info bocor.
       return NextResponse.json({ ok: true });
     }
+    
   }
 
   let body: TelegramUpdate | null = null;
@@ -26,19 +33,24 @@ export async function POST(request: Request) {
   }
 
   const message = body?.message ?? body?.edited_message;
-  
+
   if (!message) {
+    console.log("message not found");
+    
     return NextResponse.json({ ok: true });
   }
 
-  // Proses async — kita tidak await agar respons cepat (≤200ms target).
-  // Tapi: pada serverless, function bisa berhenti sebelum promise selesai.
-  // Untuk Next.js node runtime ini biasanya OK, tapi catat trade-off-nya.
-  void handleTelegramUpdate(message).catch((err) => {
+  try {
+    await handleTelegramUpdate(message);
+  } catch (err) {
     console.error("[telegram] gagal proses update:", err);
-  });
+  }
 
   return NextResponse.json({ ok: true });
+} catch (error) {
+  console.error("[telegram] gagal proses update:", error);
+  return handleError(error);
+}
 }
 
 export async function GET() {

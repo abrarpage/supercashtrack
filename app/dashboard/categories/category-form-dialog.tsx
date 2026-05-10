@@ -21,10 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  createCategorySchema,
-  type CreateCategoryInput,
-} from "@/lib/validations/category";
+import { createCategorySchema, type CreateCategoryInput } from "@/lib/validations/category";
 import { useApiPatch, useApiPost } from "@/services/client/crud";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -32,11 +29,10 @@ function getErrorMessage(error: unknown, fallback: string) {
     typeof error === "object" &&
     error !== null &&
     "response" in error &&
-    typeof (error as { response?: { data?: { error?: string } } }).response?.data
-      ?.error === "string"
+    typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error ===
+      "string"
   ) {
-    return (error as { response?: { data?: { error?: string } } }).response!.data!
-      .error!;
+    return (error as { response?: { data?: { error?: string } } }).response!.data!.error!;
   }
   return fallback;
 }
@@ -55,15 +51,10 @@ interface Props {
   onSaved: () => void;
 }
 
-export function CategoryFormDialog({
-  open,
-  onOpenChange,
-  category,
-  onSaved,
-}: Props) {
+export function CategoryFormDialog({ open, onOpenChange, category, onSaved }: Props) {
   const isEdit = !!category;
-  const createCategory = useApiPost ("categories");
-  const updateCategory = useApiPatch ("categories");
+  const createCategory = useApiPost("categories");
+  const updateCategory = useApiPatch("categories");
 
   const form = useForm<CreateCategoryInput>({
     resolver: zodResolver(createCategorySchema),
@@ -100,9 +91,7 @@ export function CategoryFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Edit Kategori" : "Kategori Baru"}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Kategori" : "Kategori Baru"}</DialogTitle>
           <DialogDescription>
             {isEdit
               ? "Ubah nama atau tipe kategori."
@@ -113,15 +102,9 @@ export function CategoryFormDialog({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Nama kategori</Label>
-            <Input
-              id="name"
-              placeholder="Contoh: Makan"
-              {...form.register("name")}
-            />
+            <Input id="name" placeholder="Contoh: Makan" {...form.register("name")} />
             {form.formState.errors.name && (
-              <p className="text-xs text-trading-down">
-                {form.formState.errors.name.message}
-              </p>
+              <p className="text-xs text-trading-down">{form.formState.errors.name.message}</p>
             )}
           </div>
 
@@ -129,9 +112,7 @@ export function CategoryFormDialog({
             <Label htmlFor="type">Tipe</Label>
             <Select
               value={form.watch("type")}
-              onValueChange={(v) =>
-                form.setValue("type", v as "INCOME" | "EXPENSE")
-              }
+              onValueChange={(v) => form.setValue("type", v as "INCOME" | "EXPENSE")}
             >
               <SelectTrigger id="type">
                 <SelectValue placeholder="Pilih tipe" />
@@ -142,31 +123,21 @@ export function CategoryFormDialog({
               </SelectContent>
             </Select>
             {form.formState.errors.type && (
-              <p className="text-xs text-trading-down">
-                {form.formState.errors.type.message}
-              </p>
+              <p className="text-xs text-trading-down">{form.formState.errors.type.message}</p>
             )}
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
             <Button
               type="submit"
               disabled={
-                form.formState.isSubmitting ||
-                createCategory.isPending ||
-                updateCategory.isPending
+                form.formState.isSubmitting || createCategory.isPending || updateCategory.isPending
               }
             >
-              {form.formState.isSubmitting ||
-              createCategory.isPending ||
-              updateCategory.isPending
+              {form.formState.isSubmitting || createCategory.isPending || updateCategory.isPending
                 ? "Menyimpan..."
                 : "Simpan"}
             </Button>

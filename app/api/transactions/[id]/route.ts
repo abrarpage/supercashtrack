@@ -28,10 +28,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
 
     const existing = await prisma.transaction.findUnique({ where: { id } });
     if (!existing || existing.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Transaksi tidak ditemukan" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
     }
 
     if (parsed.data.categoryId) {
@@ -43,10 +40,7 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
         category.userId !== session.user.id ||
         category.type !== (parsed.data.type ?? existing.type)
       ) {
-        return NextResponse.json(
-          { error: "Kategori tidak valid" },
-          { status: 400 },
-        );
+        return NextResponse.json({ error: "Kategori tidak valid" }, { status: 400 });
       }
     }
 
@@ -57,18 +51,10 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
       include: { category: true },
       body: {
         ...(parsed.data.type ? { type: parsed.data.type } : {}),
-        ...(typeof parsed.data.amount === "number"
-          ? { amount: parsed.data.amount }
-          : {}),
-        ...(parsed.data.categoryId
-          ? { categoryId: parsed.data.categoryId }
-          : {}),
-        ...("note" in parsed.data
-          ? { note: parsed.data.note?.trim() || null }
-          : {}),
-        ...(parsed.data.occurredAt
-          ? { occurredAt: new Date(parsed.data.occurredAt) }
-          : {}),
+        ...(typeof parsed.data.amount === "number" ? { amount: parsed.data.amount } : {}),
+        ...(parsed.data.categoryId ? { categoryId: parsed.data.categoryId } : {}),
+        ...("note" in parsed.data ? { note: parsed.data.note?.trim() || null } : {}),
+        ...(parsed.data.occurredAt ? { occurredAt: new Date(parsed.data.occurredAt) } : {}),
       },
       returnValue: true,
     });
@@ -103,10 +89,7 @@ export async function DELETE(request: NextRequest, ctx: Ctx) {
     const { id } = await ctx.params;
     const existing = await prisma.transaction.findUnique({ where: { id } });
     if (!existing || existing.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Transaksi tidak ditemukan" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
     }
 
     await REMOVE(request, { table: "transaction", params: ctx.params, returnValue: true });

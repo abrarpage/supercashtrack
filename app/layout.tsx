@@ -4,6 +4,9 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import QueryProvider from "@/components/QueryProvider";
+import { getSiteUrl, siteConfig } from "@/lib/config";
+
+const siteUrl = getSiteUrl();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +19,66 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cash Tracker — Catat keuangan lewat Telegram",
-  description:
-    "Lacak pemasukan dan pengeluaran kamu lewat Telegram. Cepat, sederhana, dan rapi.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "SuperCashTrack | Catat keuangan lewat Telegram",
+    template: `%s | ${siteConfig.name}`,
+  },
+  description: siteConfig.description,
+  keywords: [
+    "supercashtrack",
+    "catat keuangan",
+    "pencatatan keuangan",
+    "telegram",
+    "pemasukan pengeluaran",
+    "budget",
+    "uang harian",
+    "finansial pribadi",
+    "indonesia",
+  ],
+  authors: [{ name: `${siteConfig.name} Team` }],
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    url: siteUrl,
+    siteName: siteConfig.name,
+    title: "SuperCashTrack | Catat keuangan lewat Telegram",
+    description: siteConfig.description,
+    images: [
+      {
+        url: `${siteUrl}${siteConfig.ogImage}`,
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} — catat keuangan lewat Telegram`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SuperCashTrack | Catat keuangan lewat Telegram",
+    description: siteConfig.description,
+    images: [`${siteUrl}${siteConfig.ogImage}`],
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
 };
 
 export default function RootLayout({
@@ -34,7 +94,6 @@ export default function RootLayout({
       <body className="min-h-full bg-canvas text-ink flex flex-col">
         <SessionProvider>
           <QueryProvider>
-
             {children}
             <Toaster
               position="top-right"
@@ -49,7 +108,6 @@ export default function RootLayout({
               }}
             />
           </QueryProvider>
-
         </SessionProvider>
       </body>
     </html>

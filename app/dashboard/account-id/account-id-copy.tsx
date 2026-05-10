@@ -21,20 +21,9 @@ export function AccountIdCopy({ publicId }: { publicId: string }) {
 
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg border border-hairline bg-canvas p-4">
-      <div className="font-numeric text-2xl font-bold tracking-widest text-primary">
-        {publicId}
-      </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={handleCopy}
-        disabled={publicId === "—"}
-      >
-        {copied ? (
-          <Check className="h-4 w-4" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
+      <div className="font-numeric text-2xl font-bold tracking-widest text-primary">{publicId}</div>
+      <Button variant="secondary" size="sm" onClick={handleCopy} disabled={publicId === "—"}>
+        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         {copied ? "Tersalin" : "Salin"}
       </Button>
     </div>

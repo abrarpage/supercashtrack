@@ -28,13 +28,10 @@ export function TelegramIntegrationCard({ publicId, integrations }: Props) {
         typeof error === "object" &&
         error !== null &&
         "response" in error &&
-        typeof (error as { response?: { data?: { error?: string } } }).response
-          ?.data?.error === "string"
+        typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error ===
+          "string"
       ) {
-        toast.error(
-          (error as { response?: { data?: { error?: string } } }).response!.data!
-            .error!,
-        );
+        toast.error((error as { response?: { data?: { error?: string } } }).response!.data!.error!);
         return;
       }
       toast.error("Gagal memutuskan koneksi");
@@ -52,14 +49,12 @@ export function TelegramIntegrationCard({ publicId, integrations }: Props) {
             >
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium text-ink-strong">
-                  {integrations.length > 1
-                    ? `Sesi Telegram #${idx + 1}`
-                    : "Telegram terhubung"}
+                  {integrations.length > 1 ? `Sesi Telegram #${idx + 1}` : "Telegram terhubung"}
                 </span>
               </div>
               <p className="mb-3 text-xs text-muted">
-                Satu sesi = satu chat Telegram yang sudah dikaitkan lewat Account ID. Nama
-                pengguna Telegram tidak disimpan di Cash Tracker.
+                Satu sesi = satu chat Telegram yang sudah dikaitkan lewat Account ID. Nama pengguna
+                Telegram tidak disimpan di Cash Tracker.
               </p>
               <InfoRow label="Terhubung sejak" value={integration.linkedAt} />
             </div>
@@ -75,8 +70,7 @@ export function TelegramIntegrationCard({ publicId, integrations }: Props) {
               <code className="font-numeric text-ink">15000 beli es krim</code>
             </li>
             <li>
-              Pemasukan:{" "}
-              <code className="font-numeric text-ink">+500000 gaji freelance</code>
+              Pemasukan: <code className="font-numeric text-ink">+500000 gaji freelance</code>
             </li>
             <li>
               Dengan kategori:{" "}
@@ -108,21 +102,26 @@ export function TelegramIntegrationCard({ publicId, integrations }: Props) {
       <div className="rounded-lg border border-hairline bg-surface-elevated p-4 text-sm">
         <p className="font-medium text-ink-strong">Cara menghubungkan:</p>
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted">
-          <li>Buka bot SuperCashTrack di Telegram. <a href="https://t.me/supercashtrack_bot" target="_blank" className="text-blue-500 hover:text-blue-400 hover:underline">
-          https://t.me/supercashtrack_bot
-          </a> </li>
+          <li>
+            Buka bot SuperCashTrack di Telegram.{" "}
+            <a
+              href="https://t.me/supercashtrack_bot"
+              target="_blank"
+              className="text-blue-500 hover:text-blue-400 hover:underline"
+            >
+              https://t.me/supercashtrack_bot
+            </a>{" "}
+          </li>
           <li>
             Kirim <code className="font-numeric text-ink">/start</code>.
           </li>
           <li>
             Saat diminta, kirim Account ID kamu:{" "}
-            <code className="font-numeric text-primary">
-              {publicId ?? "(belum tersedia)"}
-            </code>
+            <code className="font-numeric text-primary">{publicId ?? "(belum tersedia)"}</code>
           </li>
           <li>
-            Untuk akun Telegram lain, ulangi dengan Account ID yang sama — transaksi tetap
-            masuk ke akun Cash Tracker kamu.
+            Untuk akun Telegram lain, ulangi dengan Account ID yang sama — transaksi tetap masuk ke
+            akun Cash Tracker kamu.
           </li>
         </ol>
       </div>

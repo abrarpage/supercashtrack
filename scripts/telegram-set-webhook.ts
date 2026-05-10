@@ -42,7 +42,7 @@ async function main() {
   const secretToken = requiredEnv("TELEGRAM_WEBHOOK_SECRET");
   const isDevelopment = process.env.NODE_ENV === "development";
   const allowedUpdates = parseAllowedUpdates(process.env.TELEGRAM_ALLOWED_UPDATES);
-const finalWebhookUrl=`${isDevelopment ? NgrokUrl : process.env.NEXT_PUBLIC_APP_URL}/api/telegram/webhook`;
+  const finalWebhookUrl = `${isDevelopment ? NgrokUrl : process.env.NEXT_PUBLIC_APP_URL}/api/telegram/webhook`;
   const endpoint = `https://api.telegram.org/bot${botToken}/setWebhook`;
   const body = {
     url: finalWebhookUrl,
@@ -74,4 +74,3 @@ main().catch((err) => {
   console.error(err instanceof Error ? err.message : err);
   process.exit(1);
 });
-

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TelegramIntegrationCard } from "./telegram-integration-card";
 import { useApiAnyGet } from "@/services/client/crud";
@@ -52,14 +46,13 @@ export function IntegrationsPageContent() {
         <h1 className="text-2xl font-bold text-ink-strong">Integrasi</h1>
         <p className="text-sm text-muted">
           Hubungkan SuperCashtrack dengan layanan lain (saat ini tersedia Telegram).
-           
         </p>
-        <Button asChild variant="outline" className="mt-4" >
+        <Button asChild variant="outline" className="mt-4">
           <Link href="https://t.me/supercashtrack_bot">
-              <Send className="h-4 w-4" />
-              Hubungkan
+            <Send className="h-4 w-4" />
+            Hubungkan
           </Link>
-            </Button>
+        </Button>
       </div>
 
       <Card>
@@ -67,8 +60,8 @@ export function IntegrationsPageContent() {
           <div>
             <CardTitle className="flex items-center gap-2">Telegram</CardTitle>
             <CardDescription>
-              Catat transaksi langsung lewat chat Telegram. Beberapa akun Telegram
-              bisa terhubung ke akun SuperCashtrack yang sama.
+              Catat transaksi langsung lewat chat Telegram. Beberapa akun Telegram bisa terhubung ke
+              akun SuperCashtrack yang sama.
             </CardDescription>
           </div>
           {hasAny ? (
@@ -78,10 +71,7 @@ export function IntegrationsPageContent() {
           )}
         </CardHeader>
         <CardContent>
-          <TelegramIntegrationCard
-            publicId={integrationData.publicId}
-            integrations={formatted}
-          />
+          <TelegramIntegrationCard publicId={integrationData.publicId} integrations={formatted} />
         </CardContent>
       </Card>
     </div>

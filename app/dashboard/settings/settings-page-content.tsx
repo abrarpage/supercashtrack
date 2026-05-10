@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApiAnyGet } from "@/services/client/crud";
 import { SettingsForm } from "./settings-form";
 
@@ -18,7 +12,7 @@ type SettingsData = {
 };
 
 export function SettingsPageContent() {
-  const { data, isLoading } = useApiAnyGet ("settings");
+  const { data, isLoading } = useApiAnyGet("settings");
   const settings = (data?.data ?? null) as SettingsData | null;
 
   if (isLoading || !settings) {

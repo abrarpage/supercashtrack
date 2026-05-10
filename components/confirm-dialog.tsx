@@ -48,12 +48,7 @@ export function ConfirmDialog({
           >
             {cancelLabel}
           </Button>
-          <Button
-            type="button"
-            variant={confirmVariant}
-            onClick={onConfirm}
-            disabled={loading}
-          >
+          <Button type="button" variant={confirmVariant} onClick={onConfirm} disabled={loading}>
             {loading ? "Memproses..." : confirmLabel}
           </Button>
         </DialogFooter>

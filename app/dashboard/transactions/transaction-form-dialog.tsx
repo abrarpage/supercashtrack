@@ -26,11 +26,10 @@ function getErrorMessage(error: unknown, fallback: string) {
     typeof error === "object" &&
     error !== null &&
     "response" in error &&
-    typeof (error as { response?: { data?: { error?: string } } }).response?.data
-      ?.error === "string"
+    typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error ===
+      "string"
   ) {
-    return (error as { response?: { data?: { error?: string } } }).response!.data!
-      .error!;
+    return (error as { response?: { data?: { error?: string } } }).response!.data!.error!;
   }
   return fallback;
 }
@@ -83,9 +82,9 @@ export function TransactionFormDialog({
 }: Props) {
   const isEdit = !!transaction;
   const [creatingCategory, setCreatingCategory] = useState(false);
-  const createCategory = useApiPost ("categories");
-  const createTransaction = useApiPost ("transactions");
-  const updateTransaction = useApiPatch ("transactions");
+  const createCategory = useApiPost("categories");
+  const createTransaction = useApiPost("transactions");
+  const updateTransaction = useApiPatch("transactions");
 
   const form = useForm<CreateTransactionInput>({
     resolver: zodResolver(createTransactionSchema),
@@ -98,8 +97,8 @@ export function TransactionFormDialog({
     },
   });
   useEffect(() => {
-    setTimeout(() => (document.body.style.pointerEvents = ''), 0)
-  })
+    setTimeout(() => (document.body.style.pointerEvents = ""), 0);
+  });
   useEffect(() => {
     if (open) {
       form.reset({
@@ -120,8 +119,7 @@ export function TransactionFormDialog({
     value: c.id,
     label: c.name,
   }));
-  const selectedCategoryOption =
-    categoryOptions.find((o) => o.value === watchedCategoryId) ?? null;
+  const selectedCategoryOption = categoryOptions.find((o) => o.value === watchedCategoryId) ?? null;
 
   async function handleCreateCategory(name: string) {
     setCreatingCategory(true);
@@ -146,9 +144,7 @@ export function TransactionFormDialog({
       const payload = {
         ...values,
         amount: Number(values.amount),
-        occurredAt: values.occurredAt
-          ? new Date(values.occurredAt).toISOString()
-          : undefined,
+        occurredAt: values.occurredAt ? new Date(values.occurredAt).toISOString() : undefined,
       };
       if (isEdit) {
         await updateTransaction.mutateAsync({
@@ -166,19 +162,11 @@ export function TransactionFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}
-    >
-      <DialogContent
-    onInteractOutside={(e) => e.preventDefault()}
-      
-      >
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? "Edit Transaksi" : "Transaksi Baru"}
-          </DialogTitle>
-          <DialogDescription>
-            Catat pemasukan atau pengeluaran kamu.
-          </DialogDescription>
+          <DialogTitle>{isEdit ? "Edit Transaksi" : "Transaksi Baru"}</DialogTitle>
+          <DialogDescription>Catat pemasukan atau pengeluaran kamu.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -188,9 +176,7 @@ export function TransactionFormDialog({
               <RSelect<RSOption<CatType>>
                 inputId="type"
                 options={TYPE_OPTIONS}
-                value={
-                  TYPE_OPTIONS.find((o) => o.value === watchedType) ?? null
-                }
+                value={TYPE_OPTIONS.find((o) => o.value === watchedType) ?? null}
                 onChange={(opt) => {
                   if (!opt) return;
                   form.setValue("type", opt.value);
@@ -202,11 +188,7 @@ export function TransactionFormDialog({
 
             <div className="space-y-2">
               <Label htmlFor="occurredAt">Tanggal</Label>
-              <Input
-                id="occurredAt"
-                type="date"
-                {...form.register("occurredAt")}
-              />
+              <Input id="occurredAt" type="date" {...form.register("occurredAt")} />
             </div>
           </div>
 
@@ -221,9 +203,7 @@ export function TransactionFormDialog({
               {...form.register("amount", { valueAsNumber: true })}
             />
             {form.formState.errors.amount && (
-              <p className="text-xs text-trading-down">
-                {form.formState.errors.amount.message}
-              </p>
+              <p className="text-xs text-trading-down">{form.formState.errors.amount.message}</p>
             )}
           </div>
 
@@ -250,19 +230,11 @@ export function TransactionFormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="note">Catatan (opsional)</Label>
-            <Input
-              id="note"
-              placeholder="Contoh: beli es krim"
-              {...form.register("note")}
-            />
+            <Input id="note" placeholder="Contoh: beli es krim" {...form.register("note")} />
           </div>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Batal
             </Button>
             <Button

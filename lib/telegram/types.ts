@@ -32,6 +32,8 @@ export interface ParsedTransaction {
   amount: number;
   category: string;
   note: string | null;
+  /** `hashtag` → category from `#tag`; DB upsert creates missing category. */
+  categorySource: "hashtag" | "plain";
 }
 
 export interface ParsedCommand {
@@ -49,8 +51,4 @@ export interface ParsedUnknown {
   kind: "unknown";
 }
 
-export type ParsedInput =
-  | ParsedTransaction
-  | ParsedCommand
-  | ParsedAccountId
-  | ParsedUnknown;
+export type ParsedInput = ParsedTransaction | ParsedCommand | ParsedAccountId | ParsedUnknown;

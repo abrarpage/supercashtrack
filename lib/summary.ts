@@ -19,9 +19,7 @@ export interface DashboardSummary {
   }[];
 }
 
-export async function getDashboardSummary(
-  userId: string,
-): Promise<DashboardSummary> {
+export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
   const now = new Date();
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
@@ -48,12 +46,8 @@ export async function getDashboardSummary(
     }),
   ]);
 
-  const totalIncome = Number(
-    grouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0,
-  );
-  const totalExpense = Number(
-    grouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0,
-  );
+  const totalIncome = Number(grouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0);
+  const totalExpense = Number(grouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0);
 
   // Top categories
   const categoryIds = topByCat.map((g) => g.categoryId);
@@ -80,10 +74,7 @@ export async function getDashboardSummary(
   }
 
   // Monthly trend (6 bulan terakhir, termasuk bulan ini)
-  const monthlyMap = new Map<
-    string,
-    { income: number; expense: number }
-  >();
+  const monthlyMap = new Map<string, { income: number; expense: number }>();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;

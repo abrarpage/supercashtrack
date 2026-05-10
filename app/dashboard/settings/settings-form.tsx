@@ -12,10 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  updateSettingsSchema,
-  type UpdateSettingsInput,
-} from "@/lib/validations/settings";
+import { updateSettingsSchema, type UpdateSettingsInput } from "@/lib/validations/settings";
 import { useApi } from "@/services/client/crud";
 import { useMutation } from "@tanstack/react-query";
 
@@ -40,8 +37,7 @@ const CURRENCIES = [
 export function SettingsForm({ initial }: { initial: Initial }) {
   const { api } = useApi();
   const updateSettings = useMutation({
-    mutationFn: async (values: UpdateSettingsInput) =>
-      api.patch ("settings", values),
+    mutationFn: async (values: UpdateSettingsInput) => api.patch("settings", values),
   });
   const form = useForm<UpdateSettingsInput>({
     resolver: zodResolver(updateSettingsSchema),
@@ -61,13 +57,10 @@ export function SettingsForm({ initial }: { initial: Initial }) {
         typeof error === "object" &&
         error !== null &&
         "response" in error &&
-        typeof (error as { response?: { data?: { error?: string } } }).response
-          ?.data?.error === "string"
+        typeof (error as { response?: { data?: { error?: string } } }).response?.data?.error ===
+          "string"
       ) {
-        toast.error(
-          (error as { response?: { data?: { error?: string } } }).response!.data!
-            .error!,
-        );
+        toast.error((error as { response?: { data?: { error?: string } } }).response!.data!.error!);
         return;
       }
       toast.error("Gagal menyimpan pengaturan");
@@ -86,15 +79,9 @@ export function SettingsForm({ initial }: { initial: Initial }) {
 
       <div className="space-y-2">
         <Label htmlFor="name">Nama</Label>
-        <Input
-          id="name"
-          placeholder="Nama tampilan"
-          {...form.register("name")}
-        />
+        <Input id="name" placeholder="Nama tampilan" {...form.register("name")} />
         {form.formState.errors.name && (
-          <p className="text-xs text-trading-down">
-            {form.formState.errors.name.message}
-          </p>
+          <p className="text-xs text-trading-down">{form.formState.errors.name.message}</p>
         )}
       </div>
 
