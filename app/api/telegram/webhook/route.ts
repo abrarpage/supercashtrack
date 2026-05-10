@@ -3,11 +3,15 @@
 import { NextResponse } from "next/server";
 import { handleTelegramUpdate } from "@/lib/telegram/handler";
 import type { TelegramUpdate } from "@/lib/telegram/types";
+import { handleError } from "@/services/server";
 
 // Selalu jalankan dinamis, jangan di-cache.
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
+  try {
+    
+
   // Validasi secret token (jika diset)
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (expectedSecret) {
@@ -43,6 +47,10 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ ok: true });
+} catch (error) {
+  console.error("[telegram] gagal proses update:", error);
+  return handleError(error);
+}
 }
 
 export async function GET() {
