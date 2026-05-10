@@ -1,6 +1,10 @@
 // Pesan-pesan balasan bot Telegram, semua dalam Bahasa Indonesia.
 import { formatIDR, formatDateID } from "@/lib/format";
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 export const REPLY_WELCOME = `Halo! Selamat datang di Cash Tracker Bot.
 Silakan masukkan Account ID kamu untuk menghubungkan akun.
 Contoh: CT-8F29XQ`;
@@ -91,7 +95,8 @@ export function formatFilteredChatAppendix(chats: TelegramChatSummary[]): string
   }
   const lines = take.map((m) => {
     const t = formatDateID(m.timestamp);
-    const short = m.content.length > 120 ? `${m.content.slice(0, 117)}…` : m.content;
+    const raw = m.content.length > 120 ? `${m.content.slice(0, 117)}…` : m.content;
+    const short = escapeHtml(raw);
     return `• ${t} · ${m.senderType}: ${short}`;
   });
   return `\n\n---\n📜 <b>Riwayat chat aplikasi</b> (akun ini saja):\n${lines.join("\n")}`;
@@ -113,12 +118,13 @@ export function replyTransactionRecorded(args: {
   const title = isIncome ? "✅ Pemasukan berhasil dicatat!" : "✅ Pengeluaran berhasil dicatat!";
   const tanggal = formatDateID(args.occurredAt);
   const jumlah = formatIDR(args.amount);
-  const catatan = args.note ?? "(tanpa catatan)";
+  const catatan = escapeHtml(args.note ?? "(tanpa catatan)");
+  const kategori = escapeHtml(args.categoryName);
   return `${title}
 Tanggal  : ${tanggal}
 Jumlah   : ${jumlah}
 Catatan  : ${catatan}
-Kategori : ${args.categoryName}`;
+Kategori : ${kategori}`;
 }
 
 export function replyBalance(args: { balance: number; income: number; expense: number }): string {
