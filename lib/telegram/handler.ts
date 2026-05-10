@@ -25,6 +25,7 @@ export async function handleTelegramUpdate(message: TelegramMessage) {
   const chatId = message.chat.id;
   const tgUserId = message.from?.id;
   if (!tgUserId) return;
+console.log("handleTelegramUpdate");
 
   const split = splitLeadingPublicId(text);
 
@@ -95,10 +96,14 @@ export async function handleTelegramUpdate(message: TelegramMessage) {
       chatRowId,
     );
   }
+  console.log("chatRowId:", chatRowId);
+  
 
   if (chatRowId) {
     await sendTelegramMessageAndStore(chatRowId, chatId, REPLY_UNKNOWN_FORMAT);
   } else {
+    console.log("formatTidakdikenali");
+    
     await sendTelegramMessage(chatId, REPLY_UNKNOWN_FORMAT);
   }
 }
