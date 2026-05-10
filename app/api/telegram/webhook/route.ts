@@ -36,12 +36,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Proses async — kita tidak await agar respons cepat (≤200ms target).
-  // Tapi: pada serverless, function bisa berhenti sebelum promise selesai.
-  // Untuk Next.js node runtime ini biasanya OK, tapi catat trade-off-nya.
-  void handleTelegramUpdate(message).catch((err) => {
+  try {
+    await handleTelegramUpdate(message);
+  } catch (err) {
     console.error("[telegram] gagal proses update:", err);
-  });
+  }
 
   return NextResponse.json({ ok: true });
 }

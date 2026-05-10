@@ -20,136 +20,94 @@ import {
 } from "./replies";
 import type { TelegramMessage } from "./types";
 
-// export async function handleTelegramUpdate(message: TelegramMessage) {
-//   const text = (message.text ?? "").trim();
-//   const chatId = message.chat.id;
-//   const tgUserId = message.from?.id;
-//   if (!tgUserId) return;
-// console.log("handleTelegramUpdate");
+export async function handleTelegramUpdate(message: TelegramMessage) {
+  const text = (message.text ?? "").trim();
+  const chatId = message.chat.id;
+  const tgUserId = message.from?.id;
+  if (!tgUserId) return;
+console.log("handleTelegramUpdate");
 
-//   const split = splitLeadingPublicId(text);
-// console.log("split:", split);
+  const split = splitLeadingPublicId(text);
+console.log("split:", split);
 
-//   let linkedUserId: string | null = null;
-//   let chatRowId: string | null = null;
+  let linkedUserId: string | null = null;
+  let chatRowId: string | null = null;
 
-//   // Jika ada Account ID di pesan, anggap sebagai (re)pairing.
-//   // - Jika payload kosong: hanya pairing.
-//   // - Jika ada payload: pairing + eksekusi payload (transaksi/perintah) tanpa perlu kirim lagi.
-//   if (split.publicId) {
-//     console.log("split.publicId:", split.publicId);
+  // Jika ada Account ID di pesan, anggap sebagai (re)pairing.
+  // - Jika payload kosong: hanya pairing.
+  // - Jika ada payload: pairing + eksekusi payload (transaksi/perintah) tanpa perlu kirim lagi.
+  if (split.publicId) {
+    console.log("split.publicId:", split.publicId);
     
-//     const linked = await linkChatToPublicId(chatId, split.publicId);
-//     if (!linked) {
-//       await sendTelegramMessage(chatId, REPLY_LINK_INVALID);
-//       return;
-//     }
-//     linkedUserId = linked.userId;
-//     chatRowId = linked.chatRowId;
+    const linked = await linkChatToPublicId(chatId, split.publicId);
+    if (!linked) {
+      await sendTelegramMessage(chatId, REPLY_LINK_INVALID);
+      return;
+    }
+    linkedUserId = linked.userId;
+    chatRowId = linked.chatRowId;
 
-//     if (split.rest.trim() === "") {
-//       await sendTelegramMessageAndStore(
-//         linked.chatRowId,
-//         chatId,
-//         REPLY_LINK_SUCCESS(linked.publicId),
-//       );
-//       await storeIncomingIfPossible(linked.chatRowId, text);
-//       return;
-//     }
-//   } else {
-//     const ctx = await getLinkedChatContext(chatId);
-//     linkedUserId = ctx?.userId ?? null;
-//     chatRowId = ctx?.chatRowId ?? null;
-//   }
+    if (split.rest.trim() === "") {
+      await sendTelegramMessageAndStore(
+        linked.chatRowId,
+        chatId,
+        REPLY_LINK_SUCCESS(linked.publicId),
+      );
+      await storeIncomingIfPossible(linked.chatRowId, text);
+      return;
+    }
+  } else {
+    const ctx = await getLinkedChatContext(chatId);
+    linkedUserId = ctx?.userId ?? null;
+    chatRowId = ctx?.chatRowId ?? null;
+  }
 
-//   const innerText = split.publicId ? split.rest.trim() : text.trim();
-//   const parsedInner = parseTelegramMessage(innerText);
+  const innerText = split.publicId ? split.rest.trim() : text.trim();
+  const parsedInner = parseTelegramMessage(innerText);
 
-//   // /start, /help, /bantuan — tidak wajib Account ID di baris pertama
-//   if (parsedInner.kind === "command") {
-//     const cmd = parsedInner.command;
-//     if (cmd === "start" || cmd === "help" || cmd === "bantuan") {
-//       const paired = Boolean(await getLinkedChatContext(chatId));
-//       await storeIncomingIfPossible(chatRowId, text);
-//       return handlePublicCommand(cmd, message, paired, chatRowId);
-//     }
-//   }
+  // /start, /help, /bantuan — tidak wajib Account ID di baris pertama
+  if (parsedInner.kind === "command") {
+    const cmd = parsedInner.command;
+    if (cmd === "start" || cmd === "help" || cmd === "bantuan") {
+      const paired = Boolean(await getLinkedChatContext(chatId));
+      await storeIncomingIfPossible(chatRowId, text);
+      return handlePublicCommand(cmd, message, paired, chatRowId);
+    }
+  }
 
-//   // Transaksi, /saldo, /putuskan, dll. — wajib sudah pernah pairing
-//   if (!linkedUserId) {
-//     // Jika user belum pernah pairing, minta Account ID sekali.
-//     await sendTelegramMessage(chatId, REPLY_NEED_ACCOUNT_ID);
-//     return;
-//   }
+  // Transaksi, /saldo, /putuskan, dll. — wajib sudah pernah pairing
+  if (!linkedUserId) {
+    // Jika user belum pernah pairing, minta Account ID sekali.
+    await sendTelegramMessage(chatId, REPLY_NEED_ACCOUNT_ID);
+    return;
+  }
 
-//   await storeIncomingIfPossible(chatRowId, text);
-//   const chats = await loadChatsForUser(linkedUserId);
+  await storeIncomingIfPossible(chatRowId, text);
+  const chats = await loadChatsForUser(linkedUserId);
 
-//   if (parsedInner.kind === "command") {
-//     return handlePrivilegedCommand(parsedInner.command, message, linkedUserId, chats, chatRowId);
-//   }
+  if (parsedInner.kind === "command") {
+    return handlePrivilegedCommand(parsedInner.command, message, linkedUserId, chats, chatRowId);
+  }
 
-//   if (parsedInner.kind === "transaction") {
-//     return handleTransaction(
-//       parsedInner,
-//       linkedUserId,
-//       chatId,
-//       message.message_id,
-//       chats,
-//       chatRowId,
-//     );
-//   }
-//   console.log("chatRowId:", chatRowId);
+  if (parsedInner.kind === "transaction") {
+    return handleTransaction(
+      parsedInner,
+      linkedUserId,
+      chatId,
+      message.message_id,
+      chats,
+      chatRowId,
+    );
+  }
+  console.log("chatRowId:", chatRowId);
   
 
-//   if (chatRowId) {
-//     await sendTelegramMessageAndStore(chatRowId, chatId, REPLY_UNKNOWN_FORMAT);
-//   } else {
-//     console.log("formatTidakdikenali");
+  if (chatRowId) {
+    await sendTelegramMessageAndStore(chatRowId, chatId, REPLY_UNKNOWN_FORMAT);
+  } else {
+    console.log("formatTidakdikenali");
     
-//     await sendTelegramMessage(chatId, REPLY_UNKNOWN_FORMAT);
-//   }
-// }
-
-export async function handleTelegramUpdate(message: TelegramMessage) {
-  try {
-    console.log("1. enter");
-
-    const text = (message.text ?? "").trim();
-    console.log("2. text parsed");
-
-    const chatId = message.chat.id;
-    console.log("3. chatId", chatId);
-
-    const tgUserId = message.from?.id;
-    console.log("4. tgUserId", tgUserId);
-
-    if (!tgUserId) return;
-
-    const split = splitLeadingPublicId(text);
-    console.log("5. split done");
-
-    let linkedUserId: string | null = null;
-    let chatRowId: string | null = null;
-
-    if (split.publicId) {
-      console.log("6. linking");
-
-      const linked = await linkChatToPublicId(chatId, split.publicId);
-
-      console.log("7. linked", linked);
-    } else {
-      console.log("8. before getLinkedChatContext");
-
-      const ctx = await getLinkedChatContext(chatId);
-
-      console.log("9. ctx", ctx);
-    }
-
-    console.log("10. survived");
-  } catch (err) {
-    console.error("HANDLE TELEGRAM ERROR");
-    console.error(err);
+    await sendTelegramMessage(chatId, REPLY_UNKNOWN_FORMAT);
   }
 }
 
