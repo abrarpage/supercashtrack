@@ -9,11 +9,11 @@ export const REPLY_WELCOME_BACK = (firstName?: string | null) =>
   `Halo${firstName ? `, ${firstName}` : ""}! Akun kamu sudah terhubung.
 
 Sekarang kamu bisa langsung mencatat transaksi tanpa menulis Account ID lagi:
-<pre>15000 beli kopi #makan</pre>
-(<code>#makan</code> = kategori; bisa juga tanpa hashtag: <pre>15000 makan beli kopi</pre>)
+<code>15000 beli kopi #makan</code>
+(<code>#makan</code> = kategori; bisa juga tanpa hashtag: <code>15000 makan beli kopi</code>)
 
 Kalau kamu ingin ganti akun (re-pair), cukup kirim Account ID lagi, atau pakai prefix satu baris:
-<pre>CT-8F29XQ 15000 beli kopi #makan</pre>
+<code>CT-8F29XQ 15000 beli kopi #makan</code>
 
 Ketik /bantuan untuk daftar perintah.`;
 
