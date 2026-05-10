@@ -13,9 +13,12 @@ export async function POST(request: Request) {
   if (expectedSecret) {
     const got = request.headers.get("x-telegram-bot-api-secret-token");
     if (got !== expectedSecret) {
+      console.log("secret not found");
+      
       // Pelanggar webhook secret — tetap balas 200 agar tidak ada info bocor.
       return NextResponse.json({ ok: true });
     }
+    
   }
 
   let body: TelegramUpdate | null = null;
@@ -28,6 +31,8 @@ export async function POST(request: Request) {
   const message = body?.message ?? body?.edited_message;
 
   if (!message) {
+    console.log("message not found");
+    
     return NextResponse.json({ ok: true });
   }
 
