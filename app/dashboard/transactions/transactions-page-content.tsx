@@ -17,6 +17,8 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatIDR, formatDateShortID } from "@/lib/format";
 import { Pagination } from "@/components/Pagination";
 import { useApiDelete, useApiList } from "@/services/client/crud";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import type { DateRange } from "react-day-picker";
 
 const TRANSACTIONS_PAGE_SIZE = 10;
 
@@ -57,18 +59,31 @@ export function TransactionsPageContent() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filterType, setFilterType] = useState<"ALL" | CatType>("ALL");
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [page, setPage] = useState(1);
   const [take, setTake] = useState(TRANSACTIONS_PAGE_SIZE);
+
+  const dateRangeParams = (() => {
+    if (!dateRange?.from) return null;
+    const from = new Date(dateRange.from);
+    from.setHours(0, 0, 0, 0);
+    const toDate = dateRange.to ?? dateRange.from;
+    const to = new Date(toDate);
+    to.setHours(23, 59, 59, 999);
+    return { from: from.toISOString(), to: to.toISOString() };
+  })();
+
   const transactionsQuery = useApiList("transactions", {
     queryParams: {
       take,
       page,
       ...(filterType !== "ALL" ? { type: filterType } : {}),
       ...(filterCategory !== "ALL" ? { categoryId: filterCategory } : {}),
+      ...(dateRangeParams ? { from: dateRangeParams.from, to: dateRangeParams.to } : {}),
     },
   });
   const categoriesQuery = useApiList("categories", {
-    queryParams: { sort: "type,name" },
+    queryParams: { sort: "type,name",take:500 },
   });
   const deleteTransaction = useApiDelete("transactions");
   const transactions = (transactionsQuery.data?.data ?? []) as Transaction[];
@@ -77,7 +92,7 @@ export function TransactionsPageContent() {
 
   useEffect(() => {
     setPage(1);
-  }, [filterType, filterCategory]);
+  }, [filterType, filterCategory, dateRange]);
 
   useEffect(() => {
     const pageCount = meta?.pageCount ?? 0;
@@ -138,6 +153,12 @@ export function TransactionsPageContent() {
               ))}
             </SelectContent>
           </Select>
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            className="w-[260px]"
+            placeholder="Semua tanggal"
+          />
         </CardContent>
       </Card>
 

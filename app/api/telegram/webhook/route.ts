@@ -10,15 +10,12 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    
-
-  // Validasi secret token (jika diset)
+    // Validasi secret token (jika diset)
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (expectedSecret) {
     const got = request.headers.get("x-telegram-bot-api-secret-token");
     if (got !== expectedSecret) {
       console.log("secret not found");
-      
       // Pelanggar webhook secret — tetap balas 200 agar tidak ada info bocor.
       return NextResponse.json({ ok: true });
     }
@@ -44,6 +41,7 @@ export async function POST(request: Request) {
     await handleTelegramUpdate(message);
   } catch (err) {
     console.error("[telegram] gagal proses update:", err);
+    return handleError(err);
   }
 
   return NextResponse.json({ ok: true });
