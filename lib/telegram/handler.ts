@@ -13,10 +13,10 @@ import {
   REPLY_UNKNOWN_FORMAT,
   REPLY_WELCOME,
   REPLY_WELCOME_BACK,
-  formatFilteredChatAppendix,
+  formatTransactionsAppendix,
   replyBalance,
   replyTransactionRecorded,
-  type TelegramChatSummary,
+  type TelegramTxSummary,
 } from "./replies";
 import type { TelegramMessage } from "./types";
 
@@ -83,10 +83,10 @@ console.log("split:", split);
   }
 
   await storeIncomingIfPossible(chatRowId, text);
-  const chats = await loadChatsForUser(linkedUserId);
 
   if (parsedInner.kind === "command") {
-    return handlePrivilegedCommand(parsedInner.command, message, linkedUserId, chats, chatRowId);
+    const summary = await loadTxSummaryForUser(linkedUserId);
+    return handlePrivilegedCommand(parsedInner.command, message, linkedUserId, summary, chatRowId);
   }
 
   if (parsedInner.kind === "transaction") {
@@ -95,7 +95,6 @@ console.log("split:", split);
       linkedUserId,
       chatId,
       message.message_id,
-      chats,
       chatRowId,
     );
   }
@@ -215,24 +214,36 @@ async function linkChatToPublicId(
   return { chatRowId, userId: user.id, publicId: user.publicId };
 }
 
-async function loadChatsForUser(userId: string): Promise<TelegramChatSummary[]> {
-  const rows = await prisma.chat.findMany({
-    where: { userId },
-    include: {
-      messages: {
-        orderBy: { timestamp: "desc" },
-        take: 20,
-      },
-    },
-  });
-  return rows.map((c) => ({
-    id: c.id,
-    messages: c.messages.map((m) => ({
-      content: m.content,
-      senderType: m.senderType,
-      timestamp: m.timestamp,
+async function loadTxSummaryForUser(userId: string): Promise<TelegramTxSummary> {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const [todayRows, monthGrouped] = await Promise.all([
+    prisma.transaction.findMany({
+      where: { userId, occurredAt: { gte: startOfDay } },
+      orderBy: { occurredAt: "asc" },
+      include: { category: { select: { name: true } } },
+    }),
+    prisma.transaction.groupBy({
+      by: ["type"],
+      where: { userId, occurredAt: { gte: startOfMonth, lt: startOfNextMonth } },
+      _sum: { amount: true },
+    }),
+  ]);
+
+  return {
+    today: todayRows.map((t) => ({
+      type: t.type,
+      amount: Number(t.amount),
+      note: t.note,
+      categoryName: t.category.name,
+      occurredAt: t.occurredAt,
     })),
-  }));
+    monthIncome: Number(monthGrouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0),
+    monthExpense: Number(monthGrouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0),
+  };
 }
 
 async function handlePublicCommand(
@@ -281,11 +292,11 @@ async function handlePrivilegedCommand(
   command: string,
   message: TelegramMessage,
   userId: string,
-  chats: TelegramChatSummary[],
+  summary: TelegramTxSummary,
   chatRowId: string | null,
 ) {
   const chatId = message.chat.id;
-  const appendix = formatFilteredChatAppendix(chats);
+  const appendix = formatTransactionsAppendix(summary);
 
   switch (command) {
     case "saldo":
@@ -360,11 +371,8 @@ async function handleTransaction(
   userId: string,
   chatId: number,
   telegramMessageId: number,
-  chats: TelegramChatSummary[],
   chatRowId: string | null,
 ) {
-  const appendix = formatFilteredChatAppendix(chats);
-
   const wantedCategory = (parsed.category ?? "").trim().toLowerCase();
   let category = wantedCategory
     ? await prisma.category.findFirst({
@@ -433,6 +441,9 @@ async function handleTransaction(
         occurredAt: new Date(),
       },
     });
+
+    const summary = await loadTxSummaryForUser(userId);
+    const appendix = formatTransactionsAppendix(summary);
 
     const reply =
       replyTransactionRecorded({
