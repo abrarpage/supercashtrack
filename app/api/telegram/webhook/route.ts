@@ -3,18 +3,19 @@
 import { NextResponse } from "next/server";
 import { handleTelegramUpdate } from "@/lib/telegram/handler";
 import type { TelegramUpdate } from "@/lib/telegram/types";
+import { handleError } from "@/services/server";
 
 // Selalu jalankan dinamis, jangan di-cache.
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  // Validasi secret token (jika diset)
+  try {
+    // Validasi secret token (jika diset)
   const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (expectedSecret) {
     const got = request.headers.get("x-telegram-bot-api-secret-token");
     if (got !== expectedSecret) {
       console.log("secret not found");
-      
       // Pelanggar webhook secret — tetap balas 200 agar tidak ada info bocor.
       return NextResponse.json({ ok: true });
     }
@@ -40,9 +41,14 @@ export async function POST(request: Request) {
     await handleTelegramUpdate(message);
   } catch (err) {
     console.error("[telegram] gagal proses update:", err);
+    return handleError(err);
   }
 
   return NextResponse.json({ ok: true });
+} catch (error) {
+  console.error("[telegram] gagal proses update:", error);
+  return handleError(error);
+}
 }
 
 export async function GET() {
