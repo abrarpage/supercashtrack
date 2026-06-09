@@ -10,6 +10,7 @@ import {
   REPLY_LINK_SUCCESS,
   REPLY_NEED_ACCOUNT_ID,
   REPLY_SEND_ACCOUNT_ID_FIRST,
+  REPLY_TODAY_HEADER,
   REPLY_UNKNOWN_FORMAT,
   REPLY_WELCOME,
   REPLY_WELCOME_BACK,
@@ -309,6 +310,16 @@ async function handlePrivilegedCommand(
       const income = Number(grouped.find((g) => g.type === "INCOME")?._sum.amount ?? 0);
       const expense = Number(grouped.find((g) => g.type === "EXPENSE")?._sum.amount ?? 0);
       const reply = replyBalance({ balance: income - expense, income, expense }) + appendix;
+      if (chatRowId) {
+        await sendTelegramMessageAndStore(chatRowId, chatId, reply);
+      } else {
+        await sendTelegramMessage(chatId, reply);
+      }
+      return;
+    }
+    case "harini":
+    case "today": {
+      const reply = REPLY_TODAY_HEADER + appendix;
       if (chatRowId) {
         await sendTelegramMessageAndStore(chatRowId, chatId, reply);
       } else {
