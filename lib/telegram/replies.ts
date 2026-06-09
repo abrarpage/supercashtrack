@@ -62,6 +62,7 @@ Ketik /bantuan untuk daftar perintah.`;
 export const REPLY_HELP = `📋 Daftar perintah:
 /start — sambutan & status koneksi
 /saldo — lihat saldo
+/harini — lihat transaksi hari ini & total bulan ini
 /bantuan — tampilkan pesan ini
 /putuskan — putuskan koneksi
 
@@ -113,6 +114,8 @@ export function formatTransactionsAppendix(summary: TelegramTxSummary): string {
 
   return `\n\n---\n${incomeBlock}\n\n${expenseBlock}\n\n---\n${totals}`;
 }
+
+export const REPLY_TODAY_HEADER = `🗓️ <b>Ringkasan hari ini</b>`;
 
 export const REPLY_DISCONNECTED = `🔌 Akun Telegram kamu telah diputuskan dari Cash Tracker.
 Kamu bisa hubungkan lagi kapan saja dengan mengirim Account ID.`;
