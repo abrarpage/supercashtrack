@@ -75,31 +75,43 @@ Ganti akun (re-pair) kapan saja:
 • Kirim Account ID saja: <code>CT-8F29XQ</code>
 • Atau prefix: <code>CT-8F29XQ 15000 beli kopi #makan</code>`;
 
-export type TelegramChatSummary = {
-  id: string;
-  messages: { content: string; senderType: string; timestamp: Date }[];
+export type TelegramTxItem = {
+  type: "INCOME" | "EXPENSE";
+  amount: number;
+  note: string | null;
+  categoryName: string;
+  occurredAt: Date;
 };
 
-/** Riwayat chat aplikasi (model Chat/Message), sudah difilter per akun. */
-export function formatFilteredChatAppendix(chats: TelegramChatSummary[]): string {
-  const flat = chats.flatMap((c) =>
-    c.messages.map((m) => ({
-      chatId: c.id,
-      ...m,
-    })),
-  );
-  flat.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  const take = flat.slice(0, 8);
-  if (take.length === 0) {
-    return `\n\n---\n📜 <b>Riwayat chat aplikasi</b>: belum ada pesan tersimpan.`;
-  }
-  const lines = take.map((m) => {
-    const t = formatDateID(m.timestamp);
-    const raw = m.content.length > 120 ? `${m.content.slice(0, 117)}…` : m.content;
-    const short = escapeHtml(raw);
-    return `• ${t} · ${m.senderType}: ${short}`;
-  });
-  return `\n\n---\n📜 <b>Riwayat chat aplikasi</b> (akun ini saja):\n${lines.join("\n")}`;
+export type TelegramTxSummary = {
+  today: TelegramTxItem[];
+  monthIncome: number;
+  monthExpense: number;
+};
+
+/** Ringkasan transaksi: list hari ini + total bulan ini. */
+export function formatTransactionsAppendix(summary: TelegramTxSummary): string {
+  const income = summary.today.filter((t) => t.type === "INCOME");
+  const expense = summary.today.filter((t) => t.type === "EXPENSE");
+
+  const renderItem = (t: TelegramTxItem) => {
+    const note = t.note?.trim() ? escapeHtml(t.note.trim()) : escapeHtml(t.categoryName);
+    return `• ${formatIDR(t.amount)} — ${note} <i>(${escapeHtml(t.categoryName)})</i>`;
+  };
+
+  const incomeBlock =
+    income.length > 0
+      ? `📥 <b>Pemasukan hari ini</b>\n${income.map(renderItem).join("\n")}`
+      : `📥 <b>Pemasukan hari ini</b>: belum ada.`;
+
+  const expenseBlock =
+    expense.length > 0
+      ? `📤 <b>Pengeluaran hari ini</b>\n${expense.map(renderItem).join("\n")}`
+      : `📤 <b>Pengeluaran hari ini</b>: belum ada.`;
+
+  const totals = `📊 <b>Total bulan ini</b>\nPemasukan  : ${formatIDR(summary.monthIncome)}\nPengeluaran: ${formatIDR(summary.monthExpense)}`;
+
+  return `\n\n---\n${incomeBlock}\n\n${expenseBlock}\n\n---\n${totals}`;
 }
 
 export const REPLY_DISCONNECTED = `🔌 Akun Telegram kamu telah diputuskan dari Cash Tracker.
